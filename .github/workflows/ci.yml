@@ -1,0 +1,21 @@
+name: ci
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, reopened, synchronize]
+jobs:
+  test-stack:
+    strategy:
+      matrix:
+        stack: [heroku-22, heroku-24]
+    runs-on: sfdc-hk-ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: run stack test
+      run: bash test/test-stack.sh ${{ matrix.stack }}
+      env:
+        REPO_OWNER: heroku
+        REPO_PROJECT: heroku-integration-service-mesh
