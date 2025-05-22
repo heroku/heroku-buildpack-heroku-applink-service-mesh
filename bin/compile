@@ -45,7 +45,7 @@ VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
 BINARY_NAME="heroku-applink-service-mesh-${ARCH}-${VERSION}"
 S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 SIG_URL="${S3_URL}.sig"
-PUBKEY_URL="https://${S3_BUCKET}.s3.amazonaws.com/public-key.asc"
+PUBKEY_URL="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
 
 # Setup installation paths
 VENDOR_DIR="vendor/heroku-applink/bin"
