@@ -90,6 +90,7 @@ fi
 
 echo "Installing $BINARY_NAME..." | indent
 chmod +x "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME"
+ln -s "$BINARY_NAME" "$DOWNLOAD_INSTALL_DIR/heroku-applink-service-mesh"
 PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_NAME.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
