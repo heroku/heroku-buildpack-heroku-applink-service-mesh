@@ -28,53 +28,74 @@ ENV_DIR="$3"
 # Export env files as env vars
 export_env_dir $ENV_DIR
 
-# Formulate repo API URL
-REPO_OWNER="${HEROKU_APPLINK_SERVICE_MESH_REPO_OWNER:-heroku}"
-REPO_PROJECT="${HEROKU_APPLINK_SERVICE_MESH_REPO_PROJECT:-heroku-applink-service-mesh}"
-if [ -z "$HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; then
-    API_URL="https://api.github.com/repos/${REPO_OWNER}/${REPO_PROJECT}/releases/latest"
+# Detect architecture
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    ARCH="amd64"
+elif [ "$ARCH" = "arm64" ]; then
+    ARCH="arm64"
 else
-    API_URL="https://api.github.com/repos/heroku/heroku-applink-service-mesh/releases/tags/${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION}"
-fi
-
-# Require jq util
-if ! command -v jq > /dev/null; then
-    echo " !     jq is not installed!"
-    echo " !     Ensure the app is on the latest Heroku stack"
+    echo " !     Unsupported architecture: $ARCH"
     exit 1
 fi
 
-# Setup release vars
-RELEASE_JSON=$(curl -s $API_URL)
-MESSAGE=$(echo $RELEASE_JSON | jq .message)
-if [ ! -z "${MESSAGE}" ] && [ "${MESSAGE}" != "null" ]; then
-    echo " !     Unable to download Heroku AppLink Service Mesh: ${MESSAGE}"
-    exit 1
-fi
+# Setup S3 URL
+S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
+VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
+BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${ARCH}"
+S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
+ASC_URL="${S3_URL}.asc"
+PUBKEY_URL="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
 
-TAG=$(echo $RELEASE_JSON | jq .tag_name)
-DOWNLOAD_URL=$(echo $RELEASE_JSON | jq -r '..| .browser_download_url? // empty')
-BINARY_FILE="${BINARY_FILE:-$(echo $DOWNLOAD_URL | rev | cut -d '/' -f 1 | rev | cut -d '.' -f1)}"
+# Setup installation paths
 VENDOR_DIR="vendor/heroku-applink/bin"
 DOWNLOAD_INSTALL_DIR="$BUILD_DIR/$VENDOR_DIR"
 mkdir -p $DOWNLOAD_INSTALL_DIR
 
-# Download
-echo "-----> Installing version $TAG of Heroku AppLink Service Mesh..."
-echo "Downloading $BINARY_FILE..." | indent
-CURRENT_DIR=`echo $PWD`
-cd $DOWNLOAD_INSTALL_DIR && curl -JLs $DOWNLOAD_URL | tar xz
-cd $CURRENT_DIR
-
-if [ ! -f "$DOWNLOAD_INSTALL_DIR/$BINARY_FILE" ]; then
-    echo " !     Heroku AppLink Service Mesh binary not found at $DOWNLOAD_INSTALL_DIR/$BINARY_FILE!"
+# Require gpg
+if ! command -v gpg > /dev/null; then
+    echo " !     gpg is not installed!"
+    echo " !     Ensure the app is on the latest Heroku stack"
     exit 1
 fi
 
-echo "Installing $BINARY_FILE..." | indent
-PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_FILE.sh"
+# Download
+echo "-----> Installing Heroku AppLink Service Mesh for $ARCH..."
+echo "Downloading $BINARY_NAME..." | indent
+CURRENT_DIR=`echo $PWD`
+cd $DOWNLOAD_INSTALL_DIR
+
+# Download binary, signature and public key
+curl -JLs $S3_URL -o $BINARY_NAME
+curl -JLs $ASC_URL -o "${BINARY_NAME}.asc"
+curl -JLs $PUBKEY_URL -o "public-key.asc"
+
+# Import public key
+echo "Importing public key..." | indent
+gpg --import public-key.asc
+
+# Verify signature
+echo "Verifying binary signature..." | indent
+if ! gpg --verify "${BINARY_NAME}.asc" $BINARY_NAME; then
+    echo " !     Binary signature verification failed!"
+    exit 1
+fi
+
+cd $CURRENT_DIR
+
+if [ ! -f "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME" ]; then
+    echo " !     Heroku AppLink Service Mesh binary not found at $DOWNLOAD_INSTALL_DIR/$BINARY_NAME!"
+    exit 1
+fi
+
+echo "Installing $BINARY_NAME..." | indent
+chmod +x "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME"
+PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_NAME.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
 
+# Cleanup
+rm -f "$DOWNLOAD_INSTALL_DIR/public-key.asc" "${DOWNLOAD_INSTALL_DIR}/${BINARY_NAME}.asc"
+
 echo "Done!" | indent
-echo "-----> Ensure that $BINARY_FILE is configured in your Procfile's web process to start your app, eg $BINARY_FILE <app startup command>"
+echo "-----> Ensure that $BINARY_NAME is configured in your Procfile's web process to start your app, eg $BINARY_NAME <app startup command>"
