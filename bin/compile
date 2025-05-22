@@ -42,7 +42,7 @@ fi
 # Setup S3 URL
 S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
 VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-BINARY_NAME="heroku-applink-mesh-service-${ARCH}-${VERSION}"
+BINARY_NAME="heroku-applink-service-mesh-${ARCH}-${VERSION}"
 S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 SIG_URL="${S3_URL}.sig"
 PUBKEY_URL="https://${S3_BUCKET}.s3.amazonaws.com/public-key.asc"
