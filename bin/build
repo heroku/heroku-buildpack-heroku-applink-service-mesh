@@ -1,0 +1,74 @@
+#!/bin/sh
+
+set -e
+
+# CNB buildpack specific variables
+LAYERS_DIR="$1"
+PLATFORM_DIR="$2"
+APP_DIR="/workspace"
+
+echo "-----> Installing Heroku AppLink Service Mesh..."
+
+# Create layers directory structure
+mkdir -p "${LAYERS_DIR}/heroku-applink-service-mesh"
+
+# Setup installation paths
+DOWNLOAD_INSTALL_DIR="${APP_DIR}/vendor/heroku-applink/bin"
+mkdir -p $DOWNLOAD_INSTALL_DIR
+
+# Create empty env directory for legacy buildpack compatibility
+mkdir -p "${PLATFORM_DIR}/env"
+
+# Run the compile script with the appropriate directories
+"$(dirname "$0")/compile" "$APP_DIR" "$LAYERS_DIR" "${PLATFORM_DIR}/env"
+
+# Read web process from Procfile
+echo "-----> Reading web process from Procfile..."
+if [ -f "${APP_DIR}/Procfile" ]; then
+    WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //')
+    if [ -z "$WEB_COMMAND" ]; then
+        echo " !     No web process found in Procfile"
+        exit 1
+    fi
+else
+    echo " !     Procfile not found at ${APP_DIR}/Procfile"
+    exit 1
+fi
+
+# Get binary name from compile script
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    ARCH="amd64"
+elif [ "$ARCH" = "arm64" ]; then
+    ARCH="arm64"
+else
+    echo " !     Unsupported architecture: $ARCH"
+    exit 1
+fi
+
+VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
+BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${ARCH}"
+
+# Create layer metadata
+cat > "${LAYERS_DIR}/heroku-applink-service-mesh.toml" << EOL
+[types]
+launch = true
+build = false
+cache = false
+
+[metadata]
+version = "${VERSION}"
+arch = "${ARCH}"
+EOL
+
+# Create launch.toml to set the start command
+cat > "${LAYERS_DIR}/launch.toml" << EOL
+[[processes]]
+type = "web"
+command = ["vendor/heroku-applink/bin/${BINARY_NAME}", "${WEB_COMMAND}"]
+EOL
+
+echo "-----> Command to be executed: vendor/heroku-applink/bin/${BINARY_NAME} ${WEB_COMMAND}"
+echo "-----> The service mesh will automatically wrap your web process at runtime"
+echo "-----> Done!"
+
