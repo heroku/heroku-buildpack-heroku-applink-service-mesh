@@ -1,32 +1,36 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-set -e
-#set -x
+set -euo pipefail
 
 indent() {
     sed -u 's/^/       /'
 }
 
 export_env_dir() {
-  env_dir=$1
-  acceptlist_regex=${2:-''}
-  denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+  local env_dir=$1
   if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
+    local acceptlist_regex=${2:-''}
+    local denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+
+    pushd "$env_dir" > /dev/null
+    for e in *; do
+      [ -e "$e" ] || continue
       echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
-      export "$e=$(cat $env_dir/$e)"
-      :
+        export "$e=$(cat "$e")"
+        :
     done
+    popd > /dev/null
   fi
 }
 
 # Gather params
 BUILD_DIR="$1"
+# shellcheck disable=SC2034
 CACHE_DIR="$2"
 ENV_DIR="$3"
 
 # Export env files as env vars
-export_env_dir $ENV_DIR
+export_env_dir "$ENV_DIR"
 
 # Detect architecture
 ARCH=$(uname -m)
@@ -51,7 +55,7 @@ WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
 # Setup installation paths
 VENDOR_DIR="vendor/heroku-applink/bin"
 DOWNLOAD_INSTALL_DIR="$BUILD_DIR/$VENDOR_DIR"
-mkdir -p $DOWNLOAD_INSTALL_DIR
+mkdir -p "$DOWNLOAD_INSTALL_DIR"
 
 # Require gpg
 if ! command -v gpg > /dev/null; then
@@ -63,13 +67,13 @@ fi
 # Download
 echo "-----> Installing Heroku AppLink Service Mesh for $ARCH..."
 echo "Downloading $BINARY_NAME..." | indent
-CURRENT_DIR=`echo $PWD`
-cd $DOWNLOAD_INSTALL_DIR
+CURRENT_DIR=$(pwd)
+cd "$DOWNLOAD_INSTALL_DIR"
 
 # Download binary, signature and public key
-curl -JLs $S3_URL -o $BINARY_NAME
-curl -JLs $ASC_URL -o "${BINARY_NAME}.asc"
-curl -JLs $PUBKEY_URL -o "public-key.asc"
+curl -JLs "$S3_URL" -o "$BINARY_NAME"
+curl -JLs "$ASC_URL" -o "${BINARY_NAME}.asc"
+curl -JLs "$PUBKEY_URL" -o "public-key.asc"
 
 # Import public key
 echo "Importing public key..." | indent
@@ -77,12 +81,12 @@ gpg --import public-key.asc
 
 # Verify signature
 echo "Verifying binary signature..." | indent
-if ! gpg --verify "${BINARY_NAME}.asc" $BINARY_NAME; then
+if ! gpg --verify "${BINARY_NAME}.asc" "$BINARY_NAME"; then
     echo " !     Binary signature verification failed!"
     exit 1
 fi
 
-cd $CURRENT_DIR
+cd "$CURRENT_DIR"
 
 if [ ! -f "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME" ]; then
     echo " !     Heroku AppLink Service Mesh binary not found at $DOWNLOAD_INSTALL_DIR/$BINARY_NAME!"
@@ -93,8 +97,8 @@ echo "Installing $BINARY_NAME..." | indent
 chmod +x "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME"
 ln -s "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME" "$DOWNLOAD_INSTALL_DIR/$WELL_KNOWN_BINARY_NAME"
 PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_NAME.sh"
-mkdir -p $(dirname $PROFILE_PATH)
-echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
+mkdir -p "$(dirname "$PROFILE_PATH")"
+echo "export PATH=\"\$PATH:$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
 
 # Cleanup
 rm -f "$DOWNLOAD_INSTALL_DIR/public-key.asc" "${DOWNLOAD_INSTALL_DIR}/${BINARY_NAME}.asc"
