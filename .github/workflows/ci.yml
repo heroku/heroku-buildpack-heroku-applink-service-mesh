@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         stack: [heroku-22, heroku-24]
-    runs-on: sfdc-hk-ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - name: run stack test
