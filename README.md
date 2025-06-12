@@ -7,7 +7,7 @@ For more information, see [Heroku Integrations](https://devcenter.heroku.com/art
 ## Installation
 
 ```shell
-heroku buildpacks:add heroku/heroku-buildpack-heroku-applink-service-mesh
+heroku buildpacks:add heroku/heroku-applink-service-mesh
 ```
 
 ## Usage
