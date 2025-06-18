@@ -99,4 +99,4 @@ echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
 rm -f "$DOWNLOAD_INSTALL_DIR/public-key.asc" "${DOWNLOAD_INSTALL_DIR}/${BINARY_NAME}.asc"
 
 echo "Done!" | indent
-echo "-----> Ensure that $BINARY_NAME is configured in your Procfile's web process to start your app, eg $BINARY_NAME <app startup command>"
+echo "-----> Ensure that heroku-applink-service-mesh is configured in your Procfile's web process to start your app, eg heroku-applink-service-mesh <app startup command>"
