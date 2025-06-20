@@ -17,3 +17,10 @@ docker build \
     --build-arg REPO_PROJECT="${REPO_PROJECT:-heroku-applink-service-mesh}" \
     -t "$OUTPUT_IMAGE" \
     .
+
+docker run \
+    -e APP_PORT=3000 \
+    -e HEROKU_APPLINK_TOKEN=test \
+    -e HEROKU_APPLINK_API_URL=http://localhost:8080 \
+    --rm "$OUTPUT_IMAGE" \
+    /app/vendor/heroku-applink/bin/heroku-applink-service-mesh -v
