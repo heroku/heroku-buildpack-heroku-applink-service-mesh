@@ -46,6 +46,7 @@ BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${ARCH}"
 S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 ASC_URL="${S3_URL}.asc"
 PUBKEY_URL="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
+WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
 
 # Setup installation paths
 VENDOR_DIR="vendor/heroku-applink/bin"
@@ -90,6 +91,7 @@ fi
 
 echo "Installing $BINARY_NAME..." | indent
 chmod +x "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME"
+ln -s "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME" "$DOWNLOAD_INSTALL_DIR/$WELL_KNOWN_BINARY_NAME"
 PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_NAME.sh"
 mkdir -p $(dirname $PROFILE_PATH)
 echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
@@ -98,4 +100,4 @@ echo 'export PATH="$PATH:'$HOME/$VENDOR_DIR'"' >> $PROFILE_PATH
 rm -f "$DOWNLOAD_INSTALL_DIR/public-key.asc" "${DOWNLOAD_INSTALL_DIR}/${BINARY_NAME}.asc"
 
 echo "Done!" | indent
-echo "-----> Ensure that $BINARY_NAME is configured in your Procfile's web process to start your app, eg $BINARY_NAME <app startup command>"
+echo "-----> Ensure that $WELL_KNOWN_BINARY_NAME is configured in your Procfile's web process to start your app, eg $WELL_KNOWN_BINARY_NAME <app startup command>"
