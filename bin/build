@@ -65,7 +65,7 @@ EOL
 cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
-command = ["vendor/heroku-applink/bin/${BINARY_NAME}", "${WEB_COMMAND}"]
+command = ["${APP_DIR}/vendor/heroku-applink/bin/${BINARY_NAME}", "${WEB_COMMAND}"]
 EOL
 
 echo "-----> Command to be executed: vendor/heroku-applink/bin/${BINARY_NAME} ${WEB_COMMAND}"
