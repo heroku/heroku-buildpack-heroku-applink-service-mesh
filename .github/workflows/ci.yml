@@ -7,7 +7,15 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck bin/*
+
   test-stack:
+    needs: lint
     strategy:
       matrix:
         stack: [heroku-22, heroku-24]
