@@ -1,0 +1,9 @@
+api = "0.10"
+
+[buildpack]
+id = "heroku.com/heroku-applink-buildpack"
+version = "1.0"
+
+# Targets the buildpack will work with
+[[targets]]
+os = "linux"
