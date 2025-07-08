@@ -30,24 +30,15 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         echo " !     No web process found in Procfile"
         exit 1
     fi
+elif [[ "$WEB_COMMAND" ==~ "$BINARY_NAME" ]]; then
+    echo " !     Web process already contains the heroku-applink-service-mesh binary name"
 else
     echo " !     Procfile not found at ${APP_DIR}/Procfile"
     exit 1
 fi
 
-# Get binary name from compile script
-ARCH=$(uname -m)
-if [ "$ARCH" = "x86_64" ]; then
-    ARCH="amd64"
-elif [ "$ARCH" = "arm64" ]; then
-    ARCH="arm64"
-else
-    echo " !     Unsupported architecture: $ARCH"
-    exit 1
-fi
-
 VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${ARCH}"
+BINARY_NAME="heroku-applink-service-mesh"
 
 # Create layer metadata
 cat > "${LAYERS_DIR}/heroku-applink-service-mesh.toml" << EOL
