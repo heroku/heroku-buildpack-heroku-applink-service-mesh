@@ -30,18 +30,16 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         echo " !     No web process found in Procfile"
         exit 1
     fi
-elif [[ "$WEB_COMMAND" ==~ "$BINARY_NAME" ]]; then
-    echo " !     Web process already contains the heroku-applink-service-mesh binary name"
-else
-    echo " !     Procfile not found at ${APP_DIR}/Procfile"
-    exit 1
-fi
 
-VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-BINARY_NAME="heroku-applink-service-mesh"
+    # shellcheck disable=SC1009 disable=SC1073 disable=SC1035 disable=SC1072
+    if [[ "$WEB_COMMAND" ==~ "$BINARY_NAME" ]]; then
+        echo " !     Web process already contains the heroku-applink-service-mesh binary name"
+    else
+        VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
+        BINARY_NAME="heroku-applink-service-mesh"
 
-# Create layer metadata
-cat > "${LAYERS_DIR}/heroku-applink-service-mesh.toml" << EOL
+        # Create layer metadata
+        cat > "${LAYERS_DIR}/heroku-applink-service-mesh.toml" << EOL
 [types]
 launch = true
 build = false
@@ -52,14 +50,20 @@ version = "${VERSION}"
 arch = "${ARCH}"
 EOL
 
-# Create launch.toml to set the start command
-cat > "${LAYERS_DIR}/launch.toml" << EOL
+        # Create launch.toml to set the start command
+        cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
 command = ["${APP_DIR}/vendor/heroku-applink/bin/${BINARY_NAME}", "${WEB_COMMAND}"]
 EOL
 
-echo "-----> Command to be executed: vendor/heroku-applink/bin/${BINARY_NAME} ${WEB_COMMAND}"
-echo "-----> The service mesh will automatically wrap your web process at runtime"
+        echo "-----> Command to be executed: vendor/heroku-applink/bin/${BINARY_NAME} ${WEB_COMMAND}"
+        echo "-----> The service mesh will automatically wrap your web process at runtime"
+    fi
+else
+    echo " !     Procfile not found at ${APP_DIR}/Procfile"
+    exit 1
+fi
+
 echo "-----> Done!"
 
