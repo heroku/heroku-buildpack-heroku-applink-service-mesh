@@ -18,6 +18,21 @@ The Heroku AppLink Service Mesh binary must be configured in your Procfile web p
 web: heroku-applink-service-mesh <your app startup command>
 ```
 
+For example, for Nodejs apps:
+```shell
+web: APP_PORT=3000 heroku-applink-service-mesh npm start
+```
+
+Java apps:
+```shell
+web: APP_PORT=3000 heroku-applink-service-mesh -- java $JAVA_OPTS -jar target/app-0.0.1-SNAPSHOT.jar
+```
+
+Python apps:
+```shell
+web: heroku-applink-service-mesh --port $PORT -- uvicorn app:app --port 3000
+```
+
 The latest Heroku AppLink Service Mesh release will be installed.
 
 To declare a specific release version or tag set `HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION` config or environment variable.
