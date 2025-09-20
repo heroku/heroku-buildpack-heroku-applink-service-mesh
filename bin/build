@@ -15,13 +15,16 @@ mkdir -p "$LAYER_DIR"
 
 # Read allowed environment variables from platform directory
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET" ]; then
-    export HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET")
+    HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET")
+    export HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET
 fi
 
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; then
-    export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
+    HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
+    export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
 fi
 
+# shellcheck source=../lib/applink_installer.sh
 source "$(dirname "$0")/../lib/applink_installer.sh"
 
 # Determine current arch for caching
@@ -86,7 +89,7 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     BINARY_NAME="heroku-applink-service-mesh"
 
     # Check if web command already contains the binary name
-    if [[ "$WEB_COMMAND" =~ "$BINARY_NAME" ]]; then
+    if [[ "$WEB_COMMAND" == *"$BINARY_NAME"* ]]; then
         echo " !     Web process already contains the heroku-applink-service-mesh binary name"
     else
         # Create launch.toml to set the start command
