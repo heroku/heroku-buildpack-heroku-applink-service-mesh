@@ -10,7 +10,8 @@ APP_DIR="/workspace"
 echo "-----> Installing Heroku AppLink Service Mesh..."
 
 # Create layers directory structure
-mkdir -p "${LAYERS_DIR}/heroku-applink-service-mesh"
+LAYER_DIR="${LAYERS_DIR}/heroku-applink-service-mesh"
+mkdir -p $LAYER_DIR
 
 # Setup installation paths
 DOWNLOAD_INSTALL_DIR="${APP_DIR}/vendor/heroku-applink/bin"
@@ -20,7 +21,7 @@ mkdir -p $DOWNLOAD_INSTALL_DIR
 mkdir -p "${PLATFORM_DIR}/env"
 
 # Run the compile script with the appropriate directories
-"$(dirname "$0")/compile" "$APP_DIR" "$LAYERS_DIR" "${PLATFORM_DIR}/env"
+"$(dirname "$0")/compile" "$APP_DIR" "$LAYER_DIR" "${PLATFORM_DIR}/env"
 
 # Read web process from Procfile
 echo "-----> Reading web process from Procfile..."
