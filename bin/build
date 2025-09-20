@@ -22,26 +22,55 @@ if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; the
     export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
 fi
 
-# Source the shared utility
 source "$(dirname "$0")/../lib/applink_installer.sh"
 
-# Install binary to layer bin directory (automatically added to PATH)
-mkdir -p "${LAYER_DIR}/bin"
-if ! install_applink_binary "${LAYER_DIR}/bin"; then
-    echo " !     Failed to install Heroku AppLink Service Mesh binary"
-    exit 1
+# Determine current arch for caching
+CURRENT_ARCH=$(detect_arch)
+
+# Get current ETag from S3 to check for changes
+S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
+VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
+BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${CURRENT_ARCH}"
+S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
+
+echo "-----> Checking for cached Heroku AppLink Service Mesh..."
+CURRENT_ETAG=$(curl -sI "$S3_URL" | grep -i etag | cut -d'"' -f2 | tr -d '\r')
+
+# Check if we can reuse the existing layer
+LAYER_NEEDS_REBUILD=true
+if [ -f "${LAYER_DIR}.toml" ]; then
+    # Read cached metadata (handle indented TOML)
+    CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+    CACHED_ARCH=$(grep "arch = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+
+    # Check if binary exists and metadata matches
+    if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
+       [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
+       [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
+        echo "-----> Reusing cached Heroku AppLink Service Mesh"
+        LAYER_NEEDS_REBUILD=false
+    fi
 fi
 
-# Create layer metadata
+if [ "$LAYER_NEEDS_REBUILD" = "true" ]; then
+    # Install binary to layer bin directory (automatically added to PATH)
+    mkdir -p "${LAYER_DIR}/bin"
+    if ! install_applink_binary "${LAYER_DIR}/bin" "$CURRENT_ARCH" "$VERSION" "$S3_BUCKET"; then
+        echo " !     Failed to install Heroku AppLink Service Mesh binary"
+        exit 1
+    fi
+fi
+
+# Create/update layer metadata
 cat > "${LAYER_DIR}.toml" << EOL
 [types]
 launch = true
 build = false
-cache = false
+cache = true
 
 [metadata]
-version = "${APPLINK_VERSION}"
-arch = "${APPLINK_ARCH}"
+etag = "${CURRENT_ETAG}"
+arch = "${CURRENT_ARCH}"
 EOL
 
 

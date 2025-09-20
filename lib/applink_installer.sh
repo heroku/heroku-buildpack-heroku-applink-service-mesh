@@ -2,25 +2,28 @@
 
 set -euo pipefail
 
-# Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
-install_applink_binary() {
-    local install_dir="$1"
-
-    # Detect architecture
+# Detect and normalize architecture
+detect_arch() {
     local arch
     arch=$(uname -m)
     if [ "$arch" = "x86_64" ]; then
-        arch="amd64"
+        echo "amd64"
     elif [ "$arch" = "aarch64" ]; then
-        arch="arm64"
+        echo "arm64"
     else
         echo " !     Unsupported architecture: $arch" >&2
         return 1
     fi
+}
+
+# Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
+install_applink_binary() {
+    local install_dir="$1"
+    local arch="${2:-$(detect_arch)}"
+    local version="${3:-${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}}"
+    local s3_bucket="${4:-${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}}"
 
     # Setup S3 URL
-    local s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
-    local version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
     local binary_name="heroku-applink-service-mesh-${version}-${arch}"
     local s3_url="https://${s3_bucket}.s3.amazonaws.com/${binary_name}"
     local asc_url="${s3_url}.asc"

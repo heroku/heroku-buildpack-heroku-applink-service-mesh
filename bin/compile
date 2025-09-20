@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# Source the shared utility
 source "$(dirname "$0")/../lib/applink_installer.sh"
 
 export_env_dir() {
