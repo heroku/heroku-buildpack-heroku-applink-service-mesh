@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -31,12 +31,14 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         exit 1
     fi
 
-    # shellcheck disable=SC1009 disable=SC1073 disable=SC1035 disable=SC1072
-    if [[ "$WEB_COMMAND" ==~ "$BINARY_NAME" ]]; then
+    # Define binary name first
+    BINARY_NAME="heroku-applink-service-mesh"
+
+    # Check if web command already contains the binary name
+    if [[ "$WEB_COMMAND" =~ "$BINARY_NAME" ]]; then
         echo " !     Web process already contains the heroku-applink-service-mesh binary name"
     else
         VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-        BINARY_NAME="heroku-applink-service-mesh"
 
         # Create layer metadata
         cat > "${LAYERS_DIR}/heroku-applink-service-mesh.toml" << EOL
