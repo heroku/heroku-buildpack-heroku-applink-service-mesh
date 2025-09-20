@@ -2,9 +2,8 @@
 
 set -euo pipefail
 
-indent() {
-    sed -u 's/^/       /'
-}
+# Source the shared utility
+source "$(dirname "$0")/../lib/applink_installer.sh"
 
 export_env_dir() {
   local env_dir=$1
@@ -32,77 +31,19 @@ ENV_DIR="$3"
 # Export env files as env vars
 export_env_dir "$ENV_DIR"
 
-# Detect architecture
-ARCH=$(uname -m)
-if [ "$ARCH" = "x86_64" ]; then
-    export ARCH="amd64"
-elif [ "$ARCH" = "aarch64" ]; then
-    export ARCH="arm64"
-else
-    echo " !     Unsupported architecture: $ARCH"
-    exit 1
-fi
-
-# Setup S3 URL
-S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
-VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${ARCH}"
-S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
-ASC_URL="${S3_URL}.asc"
-PUBKEY_URL="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
-WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
-
-# Setup installation paths
+# Setup installation paths for classic buildpack
 VENDOR_DIR="vendor/heroku-applink/bin"
 DOWNLOAD_INSTALL_DIR="$BUILD_DIR/$VENDOR_DIR"
-mkdir -p "$DOWNLOAD_INSTALL_DIR"
 
-# Require gpg
-if ! command -v gpg > /dev/null; then
-    echo " !     gpg is not installed!"
-    echo " !     Ensure the app is on the latest Heroku stack"
+if ! install_applink_binary "$DOWNLOAD_INSTALL_DIR"; then
+    echo " !     Failed to install Heroku AppLink Service Mesh binary"
     exit 1
 fi
 
-# Download
-echo "-----> Installing Heroku AppLink Service Mesh for $ARCH..."
-echo "Downloading $BINARY_NAME..." | indent
-CURRENT_DIR=$(pwd)
-cd "$DOWNLOAD_INSTALL_DIR"
-
-# Download binary, signature and public key
-curl -JLs "$S3_URL" -o "$BINARY_NAME"
-curl -JLs "$ASC_URL" -o "${BINARY_NAME}.asc"
-curl -JLs "$PUBKEY_URL" -o "public-key.asc"
-
-# Import public key
-echo "Importing public key..." | indent
-gpg --import public-key.asc
-
-# Verify signature
-echo "Verifying binary signature..." | indent
-if ! gpg --verify "${BINARY_NAME}.asc" "$BINARY_NAME"; then
-    echo " !     Binary signature verification failed!"
-    exit 1
-fi
-
-cd "$CURRENT_DIR"
-
-if [ ! -f "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME" ]; then
-    echo " !     Heroku AppLink Service Mesh binary not found at $DOWNLOAD_INSTALL_DIR/$BINARY_NAME!"
-    exit 1
-fi
-
-echo "Installing $BINARY_NAME..." | indent
-chmod +x "$DOWNLOAD_INSTALL_DIR/$BINARY_NAME"
-# force the link to be the binary name to use /app/vendor/heroku-applink/bin/heroku-applink-service-mesh-<version>-<arch> as the source
-ln -sf "/app/$VENDOR_DIR/$BINARY_NAME" "$DOWNLOAD_INSTALL_DIR/$WELL_KNOWN_BINARY_NAME"
-PROFILE_PATH="$BUILD_DIR/.profile.d/$BINARY_NAME.sh"
+# Setup .profile.d for PATH
+PROFILE_PATH="$BUILD_DIR/.profile.d/heroku-applink-service-mesh.sh"
 mkdir -p "$(dirname "$PROFILE_PATH")"
-echo "export PATH=\"\$PATH:$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
+echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
 
-# Cleanup
-rm -f "$DOWNLOAD_INSTALL_DIR/public-key.asc" "${DOWNLOAD_INSTALL_DIR}/${BINARY_NAME}.asc"
-
-echo "Done!" | indent
-echo "-----> Ensure that $WELL_KNOWN_BINARY_NAME is configured in your Procfile's web process to start your app, eg $WELL_KNOWN_BINARY_NAME <app startup command>"
+# Create symlink for runtime (/app path)
+ln -sf "/app/$VENDOR_DIR/$(basename "$APPLINK_BINARY_PATH")" "$DOWNLOAD_INSTALL_DIR/$APPLINK_BINARY_NAME"
