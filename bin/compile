@@ -46,4 +46,4 @@ mkdir -p "$(dirname "$PROFILE_PATH")"
 echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
 
 # Create symlink for runtime (/app path)
-ln -sf "/app/$VENDOR_DIR/$(basename "$APPLINK_BINARY_PATH")" "$DOWNLOAD_INSTALL_DIR/$APPLINK_BINARY_NAME"
+ln -sf "/app/$VENDOR_DIR/$APPLINK_VERSIONED_BINARY_NAME" "$DOWNLOAD_INSTALL_DIR/$APPLINK_BINARY_NAME"
