@@ -45,6 +45,7 @@ if [ -f "${LAYER_DIR}.toml" ]; then
     # Read cached metadata (handle indented TOML)
     CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
     CACHED_ARCH=$(grep "arch = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+    CACHED_BINARY_NAME=$(grep "binary_name = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
 
     # Check if binary exists and metadata matches
     if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
@@ -52,6 +53,7 @@ if [ -f "${LAYER_DIR}.toml" ]; then
        [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
         echo "-----> Reusing cached Heroku AppLink Service Mesh"
         LAYER_NEEDS_REBUILD=false
+        APPLINK_BINARY_NAME="${CACHED_BINARY_NAME:-heroku-applink-service-mesh}"
     fi
 fi
 
@@ -74,6 +76,7 @@ cache = true
 [metadata]
 etag = "${CURRENT_ETAG}"
 arch = "${CURRENT_ARCH}"
+binary_name = "${APPLINK_BINARY_NAME}"
 EOL
 
 
@@ -86,10 +89,8 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         exit 1
     fi
 
-    BINARY_NAME="heroku-applink-service-mesh"
-
     # Check if web command already contains the binary name
-    if [[ "$WEB_COMMAND" == *"$BINARY_NAME"* ]]; then
+    if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
         echo " !     Web process already contains the heroku-applink-service-mesh binary name"
     else
         # Create launch.toml to set the start command
