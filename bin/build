@@ -86,26 +86,27 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //')
     if [ -z "$WEB_COMMAND" ]; then
         echo " !     No web process found in Procfile"
-        exit 1
-    fi
-
-    # Check if web command already contains the binary name
-    if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
-        echo " !     Web process already contains the heroku-applink-service-mesh binary name"
+        echo " !     Please add the following to your Procfile:"
+        echo " !     web: heroku-applink-service-mesh <your app startup command>"
     else
+        # Check if web command already contains the binary name
+        if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
+            echo " !     Web process already contains the heroku-applink-service-mesh binary name"
+        else
         # Create launch.toml to set the start command
         cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
 command = ["${APPLINK_BINARY_NAME}", "${WEB_COMMAND}"]
 EOL
-
-        echo "-----> Command to be executed: ${APPLINK_BINARY_NAME} ${WEB_COMMAND}"
-        echo "-----> The service mesh will automatically wrap your web process at runtime"
+            echo "-----> Command to be executed: ${APPLINK_BINARY_NAME} ${WEB_COMMAND}"
+            echo "-----> The service mesh will automatically wrap your web process at runtime"
+        fi
     fi
 else
     echo " !     Procfile not found at ${APP_DIR}/Procfile"
-    exit 1
+    echo " !     Please add the following to your Procfile:"
+    echo " !     web: heroku-applink-service-mesh <your app startup command>"
 fi
 
 echo "-----> Done!"
