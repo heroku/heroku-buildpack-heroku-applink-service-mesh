@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: shellcheck
-        run: shellcheck bin/*
+        run: shellcheck -P lib/ bin/* lib/*
 
   test-stack:
     needs: lint
