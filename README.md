@@ -2,7 +2,7 @@
 
 This buildpack installs [Heroku AppLink Service Mesh](https://github.com/heroku/heroku-applink-service-mesh) in a Heroku app. This buildpack, and the binary it installs, is to be used in conjunction with Heroku AppLink add-on.
 
-For more information, see [Heroku Integrations](https://devcenter.heroku.com/articles/heroku-applink).
+For more information, see [Heroku AppLink](https://devcenter.heroku.com/articles/heroku-applink).
 
 ## Installation
 
