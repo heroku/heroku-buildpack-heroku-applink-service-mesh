@@ -14,26 +14,33 @@ heroku buildpacks:add heroku/heroku-applink-service-mesh
 
 The Heroku AppLink Service Mesh binary must be configured in your Procfile web process to start your app.
 
+> [!IMPORTANT]
+> The Heroku AppLink Service Mesh binary automatically binds to the default Heroku web `$PORT`. To ensure the mesh can route traffic to your application, you must configure your app to listen on a secondary port. Use the `APP_PORT` environment variable in your Procfile’s web command; this variable is read by both the Service Mesh and your application to establish the connection.
+
 ```shell
-web: heroku-applink-service-mesh <your app startup command>
+web: APP_PORT=<app port> heroku-applink-service-mesh <your app startup command>
 ```
 
 For example, for Nodejs apps:
 ```shell
 web: APP_PORT=3000 heroku-applink-service-mesh npm start
 ```
+Nodejs app binds to port `3000`.
 
 Java apps:
 ```shell
 web: APP_PORT=3000 heroku-applink-service-mesh -- java $JAVA_OPTS -jar target/app-0.0.1-SNAPSHOT.jar
 ```
+Java app binds to port `3000`.
 
 Python apps:
 ```shell
 web: heroku-applink-service-mesh --port $PORT -- uvicorn app:app --port 3000
 ```
+Python app binds to port `3000`.
 
-The latest Heroku AppLink Service Mesh release will be installed.
+
+On each app build, the buildpack will retrieve and install the latest release version of the binary.
 
 To declare a specific release version or tag set `HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION` config or environment variable.
 
@@ -44,7 +51,7 @@ HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=v1.0.0
 During deployment, Heroku AppLink Service Mesh binary is installed.
 
 ```shell
------> Installing version "v0.1.0" of Heroku AppLink Service Mesh...
+-----> Installing version "v1.0.0" of Heroku AppLink Service Mesh...
        Downloading heroku-applink-service-mesh...
        Installing heroku-applink-service-mesh...
        Done!
