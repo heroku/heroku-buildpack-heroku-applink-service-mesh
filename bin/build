@@ -38,9 +38,7 @@ S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 
 echo "-----> Checking for cached Heroku AppLink Service Mesh..."
 CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
-if [ -z "$CURRENT_ETAG" ]; then
-    echo "-----> Warning: Could not retrieve ETag from S3, skipping cache validation"
-elif [ -f "${LAYER_DIR}.toml" ]; then
+if [ -n "$CURRENT_ETAG" ] && [ -f "${LAYER_DIR}.toml" ]; then
     # Check if we can reuse the existing layer
     # Read cached metadata (handle indented TOML)
     CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
