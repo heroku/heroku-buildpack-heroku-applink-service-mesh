@@ -8,3 +8,8 @@ clear-env = true
 # Targets the buildpack will work with
 [[targets]]
 os = "linux"
+arch = "amd64"
+
+[[targets]]
+os = "linux"
+arch = "arm64"
