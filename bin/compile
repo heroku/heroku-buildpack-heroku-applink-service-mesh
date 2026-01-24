@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-# shellcheck source=../lib/applink_installer.sh
-source "$(dirname "$0")/../lib/applink_installer.sh"
+BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
+source "${BUILDPACK_DIR:?}/lib/applink_installer.sh"
 
 export_env_dir() {
   local env_dir=$1
