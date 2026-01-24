@@ -85,7 +85,6 @@ install_applink_binary() {
 
     # Export results for caller
     export APPLINK_BINARY_NAME="$well_known_binary_name"
-    export APPLINK_VERSIONED_BINARY_NAME="$binary_name"
 
     return 0
 }
