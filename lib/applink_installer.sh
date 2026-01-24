@@ -34,9 +34,11 @@ get_binary_s3_url() {
 # Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
 install_applink_binary() {
     local install_dir="$1"
+    local cached_etag="${2:-}"
     local arch
     local version
     local s3_url
+    local current_etag
 
     arch=$(detect_arch)
     version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
@@ -44,9 +46,22 @@ install_applink_binary() {
 
     # Setup S3 URL
     local binary_name="heroku-applink-service-mesh-${version}-${arch}"
+    local well_known_binary_name="heroku-applink-service-mesh"
+
+    # Get current ETag from S3
+    current_etag=$(curl -sI "$s3_url" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
+    export APPLINK_CURRENT_ETAG="$current_etag"
+
+    # Check if we can reuse existing binary
+    if [ -n "$cached_etag" ] && [ -n "$current_etag" ] && \
+       [ "$cached_etag" = "$current_etag" ] && \
+       [ -f "$install_dir/$well_known_binary_name" ]; then
+        echo "-----> Reusing cached Heroku AppLink Service Mesh"
+        return 0
+    fi
+
     local asc_url="${s3_url}.asc"
     local pubkey_url="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
-    local well_known_binary_name="heroku-applink-service-mesh"
 
     # Create installation directory
     mkdir -p "$install_dir"
