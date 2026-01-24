@@ -51,7 +51,7 @@ EOL
 # Read web process from Procfile
 echo "-----> Reading web process from Procfile..."
 if [ -f "${APP_DIR}/Procfile" ]; then
-    WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //')
+    WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //' || echo "")
     if [ -z "$WEB_COMMAND" ]; then
         echo " !     No web process found in Procfile"
         echo " !     Please add the following to your Procfile:"
