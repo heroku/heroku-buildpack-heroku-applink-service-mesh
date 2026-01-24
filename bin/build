@@ -7,8 +7,6 @@ LAYERS_DIR="$1"
 PLATFORM_DIR="$2"
 APP_DIR="/workspace"
 
-echo "-----> Installing Heroku AppLink Service Mesh..."
-
 # Create layers directory structure
 LAYER_DIR="${LAYERS_DIR}/service-mesh"
 mkdir -p "$LAYER_DIR"
