@@ -84,11 +84,8 @@ install_applink_binary() {
     echo "       Done!"
 
     # Export results for caller
-    export APPLINK_BINARY_PATH="$install_dir/$well_known_binary_name"
     export APPLINK_BINARY_NAME="$well_known_binary_name"
     export APPLINK_VERSIONED_BINARY_NAME="$binary_name"
-    export APPLINK_ARCH="$arch"
-    export APPLINK_VERSION="$version"
 
     return 0
 }
