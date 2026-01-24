@@ -7,9 +7,8 @@ LAYERS_DIR="$1"
 PLATFORM_DIR="$2"
 APP_DIR="/workspace"
 
-# Create layers directory structure
+# Set layer directory path
 LAYER_DIR="${LAYERS_DIR}/service-mesh"
-mkdir -p "$LAYER_DIR"
 
 # Read allowed environment variables from platform directory
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET" ]; then
@@ -32,7 +31,6 @@ if [ -f "${LAYER_DIR}.toml" ]; then
 fi
 
 # Install binary (handles cache checking internally)
-mkdir -p "${LAYER_DIR}/bin"
 if ! install_applink_binary "${LAYER_DIR}/bin" "$CACHED_ETAG"; then
     echo " !     Failed to install Heroku AppLink Service Mesh binary"
     exit 1
