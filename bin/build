@@ -40,9 +40,6 @@ if ! install_applink_binary "${LAYER_DIR}/bin" "$CACHED_ETAG"; then
     exit 1
 fi
 
-# Get the current ETag from the install function
-CURRENT_ETAG="$APPLINK_CURRENT_ETAG"
-
 # Create/update layer metadata
 cat > "${LAYER_DIR}.toml" << EOL
 [types]
@@ -51,7 +48,7 @@ build = false
 cache = true
 
 [metadata]
-etag = "${CURRENT_ETAG}"
+etag = "${APPLINK_CURRENT_ETAG}"
 EOL
 
 
