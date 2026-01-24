@@ -19,9 +19,13 @@ detect_arch() {
 # Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
 install_applink_binary() {
     local install_dir="$1"
-    local arch="${2:-$(detect_arch)}"
-    local version="${3:-${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}}"
-    local s3_bucket="${4:-${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}}"
+    local arch
+    local version
+    local s3_bucket
+
+    arch=$(detect_arch)
+    version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
+    s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
 
     # Setup S3 URL
     local binary_name="heroku-applink-service-mesh-${version}-${arch}"

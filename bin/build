@@ -52,7 +52,7 @@ fi
 if [ "${REUSING_CACHE:-false}" = "false" ]; then
     # Install binary to layer bin directory (automatically added to PATH)
     mkdir -p "${LAYER_DIR}/bin"
-    if ! install_applink_binary "${LAYER_DIR}/bin" "$CURRENT_ARCH" "$VERSION" "$S3_BUCKET"; then
+    if ! install_applink_binary "${LAYER_DIR}/bin"; then
         echo " !     Failed to install Heroku AppLink Service Mesh binary"
         exit 1
     fi
