@@ -39,14 +39,11 @@ S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
 if [ -n "$CURRENT_ETAG" ] && [ -f "${LAYER_DIR}.toml" ]; then
     # Check if we can reuse the existing layer
-    # Read cached metadata (handle indented TOML)
     CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-    CACHED_ARCH=$(grep "arch = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
 
-    # Check if binary exists and metadata matches
+    # Check if binary exists and ETAG matches
     if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
-       [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
-       [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
+       [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
         echo "-----> Reusing cached Heroku AppLink Service Mesh"
         REUSING_CACHE=true
     fi
@@ -70,7 +67,6 @@ cache = true
 
 [metadata]
 etag = "${CURRENT_ETAG}"
-arch = "${CURRENT_ARCH}"
 EOL
 
 
