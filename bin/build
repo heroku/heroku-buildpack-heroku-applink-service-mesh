@@ -30,12 +30,12 @@ source "$(dirname "$0")/../lib/applink_installer.sh"
 # Determine current arch for caching
 CURRENT_ARCH=$(detect_arch)
 
-# Get current ETag from S3 to check for changes
 S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
 VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
 BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${CURRENT_ARCH}"
 S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
 
+# Get current ETag from S3 to check for changes
 CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
 if [ -n "$CURRENT_ETAG" ] && [ -f "${LAYER_DIR}.toml" ]; then
     # Check if we can reuse the existing layer
