@@ -16,36 +16,22 @@ detect_arch() {
     fi
 }
 
-# Get S3 URL for binary
-get_binary_s3_url() {
-    local arch
-    local version
-    local s3_bucket
-    local binary_name
-
-    arch=$(detect_arch)
-    version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-    s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
-    binary_name="heroku-applink-service-mesh-${version}-${arch}"
-
-    echo "https://${s3_bucket}.s3.amazonaws.com/${binary_name}"
-}
-
 # Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
 install_applink_binary() {
     local install_dir="$1"
     local cached_etag="${2:-}"
     local arch
     local version
+    local s3_bucket
+    local binary_name
     local s3_url
     local current_etag
 
     arch=$(detect_arch)
     version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-    s3_url=$(get_binary_s3_url)
-
-    # Setup S3 URL
-    local binary_name="heroku-applink-service-mesh-${version}-${arch}"
+    s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
+    binary_name="heroku-applink-service-mesh-${version}-${arch}"
+    s3_url="https://${s3_bucket}.s3.amazonaws.com/${binary_name}"
     local well_known_binary_name="heroku-applink-service-mesh"
 
     # Get current ETag from S3
