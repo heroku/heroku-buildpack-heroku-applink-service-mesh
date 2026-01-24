@@ -61,8 +61,8 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         if [[ "$WEB_COMMAND" == *"heroku-applink-service-mesh"* ]]; then
             echo " !     Web process already contains the heroku-applink-service-mesh binary name"
         else
-        # Create launch.toml to set the start command
-        cat > "${LAYERS_DIR}/launch.toml" << EOL
+            # Create launch.toml to set the start command
+            cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
 command = ["heroku-applink-service-mesh", "${WEB_COMMAND}"]
