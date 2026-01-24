@@ -42,18 +42,17 @@ if [ -n "$CURRENT_ETAG" ] && [ -f "${LAYER_DIR}.toml" ]; then
     # Read cached metadata (handle indented TOML)
     CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
     CACHED_ARCH=$(grep "arch = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-    CACHED_BINARY_NAME=$(grep "binary_name = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
 
     # Check if binary exists and metadata matches
     if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
        [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
        [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
         echo "-----> Reusing cached Heroku AppLink Service Mesh"
-        APPLINK_BINARY_NAME="${CACHED_BINARY_NAME:-heroku-applink-service-mesh}"
+        REUSING_CACHE=true
     fi
 fi
 
-if [ -z "${APPLINK_BINARY_NAME:-}" ]; then
+if [ "${REUSING_CACHE:-false}" = "false" ]; then
     # Install binary to layer bin directory (automatically added to PATH)
     mkdir -p "${LAYER_DIR}/bin"
     if ! install_applink_binary "${LAYER_DIR}/bin" "$CURRENT_ARCH" "$VERSION" "$S3_BUCKET"; then
@@ -72,7 +71,6 @@ cache = true
 [metadata]
 etag = "${CURRENT_ETAG}"
 arch = "${CURRENT_ARCH}"
-binary_name = "${APPLINK_BINARY_NAME}"
 EOL
 
 
@@ -86,16 +84,16 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         echo " !     web: heroku-applink-service-mesh <your app startup command>"
     else
         # Check if web command already contains the binary name
-        if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
+        if [[ "$WEB_COMMAND" == *"heroku-applink-service-mesh"* ]]; then
             echo " !     Web process already contains the heroku-applink-service-mesh binary name"
         else
         # Create launch.toml to set the start command
         cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
-command = ["${APPLINK_BINARY_NAME}", "${WEB_COMMAND}"]
+command = ["heroku-applink-service-mesh", "${WEB_COMMAND}"]
 EOL
-            echo "-----> Command to be executed: ${APPLINK_BINARY_NAME} ${WEB_COMMAND}"
+            echo "-----> Command to be executed: heroku-applink-service-mesh ${WEB_COMMAND}"
             echo "-----> The service mesh will automatically wrap your web process at runtime"
         fi
     fi

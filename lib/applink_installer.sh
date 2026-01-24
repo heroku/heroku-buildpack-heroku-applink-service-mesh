@@ -83,8 +83,5 @@ install_applink_binary() {
 
     echo "       Done!"
 
-    # Export results for caller
-    export APPLINK_BINARY_NAME="$well_known_binary_name"
-
     return 0
 }
