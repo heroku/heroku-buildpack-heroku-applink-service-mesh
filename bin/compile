@@ -45,4 +45,4 @@ PROFILE_PATH="$BUILD_DIR/.profile.d/heroku-applink-service-mesh.sh"
 mkdir -p "$(dirname "$PROFILE_PATH")"
 echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
 
-echo "-----> Ensure that heroku-applink-service-mesh is configured in your Procfile's web process to start your app, e.g. heroku-applink-service-mesh <app startup command>"
+echo "-----> Ensure that ${APPLINK_WELL_KNOWN_BINARY_NAME} is configured in your Procfile's web process to start your app, e.g. ${APPLINK_WELL_KNOWN_BINARY_NAME} <app startup command>"

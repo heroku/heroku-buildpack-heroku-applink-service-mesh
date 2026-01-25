@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export APPLINK_WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
+
 # Detect and normalize architecture
 detect_arch() {
     local arch
@@ -25,8 +27,7 @@ install_applink_binary() {
     arch=$(detect_arch)
     local version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
     local s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
-    local well_known_binary_name="heroku-applink-service-mesh"
-    local binary_name="${well_known_binary_name}-${version}-${arch}"
+    local binary_name="${APPLINK_WELL_KNOWN_BINARY_NAME}-${version}-${arch}"
     local s3_url="https://${s3_bucket}.s3.amazonaws.com/${binary_name}"
 
     # Get current ETag from S3
@@ -37,7 +38,7 @@ install_applink_binary() {
     # Check if we can reuse existing binary
     if [ -n "$cached_etag" ] && [ -n "$current_etag" ] && \
        [ "$cached_etag" = "$current_etag" ] && \
-       [ -f "$install_dir/$well_known_binary_name" ]; then
+       [ -f "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME" ]; then
         echo "-----> Reusing cached Heroku AppLink Service Mesh"
         return 0
     fi
@@ -91,7 +92,7 @@ install_applink_binary() {
     chmod +x "$install_dir/$binary_name"
 
     # Create symlink for well-known name
-    ln -sf "$binary_name" "$install_dir/$well_known_binary_name"
+    ln -sf "$binary_name" "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME"
 
     # Cleanup
     rm -f "$install_dir/public-key.asc" "${install_dir}/${binary_name}.asc"

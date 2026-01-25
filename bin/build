@@ -55,21 +55,21 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     if [ -z "$WEB_COMMAND" ]; then
         echo " !     No web process found in Procfile"
         echo " !     Please add the following to your Procfile:"
-        echo " !     web: heroku-applink-service-mesh <your app startup command>"
+        echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
     else
         # Check if web command already contains the binary name
-        if [[ "$WEB_COMMAND" == *"heroku-applink-service-mesh"* ]]; then
+        if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
             echo "       The web command contains the Heroku AppLink Service Mesh binary"
         else
             echo " !     The web command doesn't contain the Heroku AppLink Service Mesh binary"
-            echo " !     Please configure 'heroku-applink-service-mesh' to start your web app, e.g.:"
-            echo " !     web: heroku-applink-service-mesh ${WEB_COMMAND}"
+            echo " !     Please configure '${APPLINK_WELL_KNOWN_BINARY_NAME}' to start your web app, e.g.:"
+            echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
         fi
     fi
 else
     echo " !     Procfile not found at ${APP_DIR}/Procfile"
     echo " !     Please add the following to your Procfile:"
-    echo " !     web: heroku-applink-service-mesh <your app startup command>"
+    echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
 fi
 
 echo "-----> Done!"
