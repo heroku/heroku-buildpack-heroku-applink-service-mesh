@@ -4,7 +4,7 @@ set -euo pipefail
 
 BUILDER_TAG="${1:-24}"
 ARCH="${2:-arm64}"
-FIXTURE=${FIXTURE:-test/fixtures/procfile_with_web_using_applink}
+FIXTURE="${3:-test/fixtures/procfile_with_web_using_applink}"
 
 BUILDER="heroku/builder:${BUILDER_TAG}"
 PLATFORM="linux/${ARCH}"
