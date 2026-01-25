@@ -37,7 +37,7 @@ remove_image
 
 run_build
 
-echo "Rebuild to test caching"
+# Run again to test caching
 run_build
 
 remove_image
