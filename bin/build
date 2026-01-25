@@ -24,23 +24,29 @@ fi
 BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
 source "${BUILDPACK_DIR:?}/lib/applink_installer.sh"
 
-# Read cached ETag if available
-CACHED_ETAG=""
-if [ -f "${LAYER_DIR}.toml" ]; then
-    CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-fi
-
 # Get current ETag from S3
 S3_URL=$(get_s3_url)
 CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
 
-# Check if we can reuse existing binary
-if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && \
-   [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
-   [ -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
-    echo "-----> Reusing cached Heroku AppLink Service Mesh"
-else
-    # Install binary
+# Check if layer was restored
+if [ -d "${LAYER_DIR}" ]; then
+    # Get ETag from layer metadata
+    CACHED_ETAG=""
+    if [ -f "${LAYER_DIR}.toml" ]; then
+        CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+    fi
+
+    # Check if cached binary can be reused
+    if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
+        echo "-----> Reusing cached Heroku AppLink Service Mesh"
+    else
+        echo "-----> Deleting cached Heroku AppLink Service Mesh binary"
+        rm -rf "${LAYER_DIR}"
+    fi
+fi
+
+# Install binary if it doesn't exist (i.e. on first run, or after the cache has been purged)
+if [ ! -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
     if ! install_applink_binary "${LAYER_DIR}/bin"; then
         echo " !     Failed to install Heroku AppLink Service Mesh binary"
         exit 1
