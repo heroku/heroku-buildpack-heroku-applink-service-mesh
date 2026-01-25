@@ -30,10 +30,21 @@ if [ -f "${LAYER_DIR}.toml" ]; then
     CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
 fi
 
-# Install binary (handles cache checking internally)
-if ! install_applink_binary "${LAYER_DIR}/bin" "$CACHED_ETAG"; then
-    echo " !     Failed to install Heroku AppLink Service Mesh binary"
-    exit 1
+# Get current ETag from S3
+S3_URL=$(get_s3_url)
+CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
+
+# Check if we can reuse existing binary
+if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && \
+   [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
+   [ -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
+    echo "-----> Reusing cached Heroku AppLink Service Mesh"
+else
+    # Install binary
+    if ! install_applink_binary "${LAYER_DIR}/bin"; then
+        echo " !     Failed to install Heroku AppLink Service Mesh binary"
+        exit 1
+    fi
 fi
 
 # Create/update layer metadata
@@ -44,7 +55,7 @@ build = false
 cache = true
 
 [metadata]
-etag = "${APPLINK_CURRENT_ETAG}"
+etag = "${CURRENT_ETAG}"
 EOL
 
 
