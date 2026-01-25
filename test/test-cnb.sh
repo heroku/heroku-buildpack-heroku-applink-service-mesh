@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
+#
+# CNB buildpack test script
+#
+# Usage: test/test-cnb.sh [BUILDER_TAG] [ARCH] [FIXTURE]
+#   BUILDER_TAG: Heroku builder version (default: 24)
+#   ARCH: Architecture to test (default: arm64)
+#   FIXTURE: Test fixture directory (default: test/fixtures/procfile_with_web_using_applink)
+#
+# This basic script builds a test image twice to help verify:
+# - Initial build downloads and installs the AppLink binary
+# - Run the `heroku-applink-service-mesh` on the output image
+# - Rebuild reuses the cached binary (ETag-based caching)
+#
+# TODO: Implement more comprehensive testing:
+# - Assert specific output messages (e.g., "Reusing cached" on rebuild, Procfile validation output, etc)
+# - Test caching behavior when the ARCH changes
+# - Test behavior when changing HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
 
 set -euo pipefail
 
