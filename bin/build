@@ -61,14 +61,9 @@ if [ -f "${APP_DIR}/Procfile" ]; then
         if [[ "$WEB_COMMAND" == *"heroku-applink-service-mesh"* ]]; then
             echo "       The web command contains the Heroku AppLink Service Mesh binary"
         else
-            # Create launch.toml to set the start command
-            cat > "${LAYERS_DIR}/launch.toml" << EOL
-[[processes]]
-type = "web"
-command = ["heroku-applink-service-mesh", "${WEB_COMMAND}"]
-EOL
-            echo "-----> Command to be executed: heroku-applink-service-mesh ${WEB_COMMAND}"
-            echo "-----> The service mesh will automatically wrap your web process at runtime"
+            echo " !     The web command doesn't contain the Heroku AppLink Service Mesh binary"
+            echo " !     Please configure 'heroku-applink-service-mesh' to start your web app, e.g.:"
+            echo " !     web: heroku-applink-service-mesh ${WEB_COMMAND}"
         fi
     fi
 else
