@@ -40,8 +40,9 @@ if ! install_applink_binary "$DOWNLOAD_INSTALL_DIR"; then
     exit 1
 fi
 
-echo "-----> Ensure that heroku-applink-service-mesh is configured in your Procfile's web process to start your app, eg heroku-applink-service-mesh <app startup command>"
 # Setup .profile.d for PATH
 PROFILE_PATH="$BUILD_DIR/.profile.d/heroku-applink-service-mesh.sh"
 mkdir -p "$(dirname "$PROFILE_PATH")"
 echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
+
+echo "-----> Ensure that heroku-applink-service-mesh is configured in your Procfile's web process to start your app, e.g. heroku-applink-service-mesh <app startup command>"
