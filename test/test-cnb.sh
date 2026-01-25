@@ -18,3 +18,8 @@ pack build "${OUTPUT_IMAGE}" \
     --buildpack ./ \
     --trust-extra-buildpacks \
     --path "${FIXTURE}"
+
+echo "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
+docker run \
+    --rm "$OUTPUT_IMAGE" \
+    -- heroku-applink-service-mesh -v
