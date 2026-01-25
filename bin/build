@@ -38,7 +38,7 @@ if [ -d "${LAYER_DIR}" ]; then
 
     # Check if cached binary can be reused
     if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
-        echo "-----> Reusing cached Heroku AppLink Service Mesh"
+        echo "-----> Reusing cached Heroku AppLink Service Mesh binary"
     else
         echo "-----> Deleting cached Heroku AppLink Service Mesh binary"
         rm -rf "${LAYER_DIR}"
