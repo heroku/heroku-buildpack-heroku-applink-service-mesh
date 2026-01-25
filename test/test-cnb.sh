@@ -16,18 +16,22 @@ if [ ! -z "$(docker images -q ${OUTPUT_IMAGE})" ]; then
     docker rmi "${OUTPUT_IMAGE}" &> /dev/null
 fi
 
-echo "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
-pack build "${OUTPUT_IMAGE}" \
-    --builder "${BUILDER}" \
-    --platform "${PLATFORM}" \
-    --buildpack ./ \
-    --trust-extra-buildpacks \
-    --path "${FIXTURE}"
+run_build() {
+    echo "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
+    pack build "${OUTPUT_IMAGE}" \
+        --builder "${BUILDER}" \
+        --platform "${PLATFORM}" \
+        --buildpack ./ \
+        --trust-extra-buildpacks \
+        --path "${FIXTURE}"
 
-echo "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
-docker run \
-    --rm "$OUTPUT_IMAGE" \
-    -- heroku-applink-service-mesh -v
+    echo "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
+    docker run \
+        --rm "$OUTPUT_IMAGE" \
+        -- heroku-applink-service-mesh -v
+}
+
+run_build
 
 echo "Removing test output image '${OUTPUT_IMAGE}'"
 docker rmi "${OUTPUT_IMAGE}" &> /dev/null || true
