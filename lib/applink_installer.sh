@@ -34,8 +34,6 @@ install_applink_binary() {
 
     local s3_url
     s3_url=$(get_s3_url)
-    local binary_name
-    binary_name=$(basename "$s3_url")
 
     local asc_url="${s3_url}.asc"
     local pubkey_url="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
@@ -52,14 +50,14 @@ install_applink_binary() {
 
     # Download and verify
     echo "-----> Installing Heroku AppLink Service Mesh"
-    echo "       Downloading $binary_name..."
+    echo "       Downloading ${APPLINK_WELL_KNOWN_BINARY_NAME}"
     local current_dir
     current_dir=$(pwd)
     cd "$install_dir"
 
     # Download binary, signature and public key
-    curl -JLs "$s3_url" -o "$binary_name"
-    curl -JLs "$asc_url" -o "${binary_name}.asc"
+    curl -JLs "$s3_url" -o "$APPLINK_WELL_KNOWN_BINARY_NAME"
+    curl -JLs "$asc_url" -o "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
     curl -JLs "$pubkey_url" -o "public-key.asc"
 
     # Import public key
@@ -68,7 +66,7 @@ install_applink_binary() {
 
     # Verify signature
     echo "       Verifying binary signature..."
-    if ! gpg --verify "${binary_name}.asc" "$binary_name"; then
+    if ! gpg --verify "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc" "$APPLINK_WELL_KNOWN_BINARY_NAME"; then
         echo " !     Binary signature verification failed!" >&2
         cd "$current_dir"
         return 1
@@ -77,19 +75,16 @@ install_applink_binary() {
     cd "$current_dir"
 
     # Install binary
-    if [ ! -f "$install_dir/$binary_name" ]; then
-        echo " !     Heroku AppLink Service Mesh binary not found at $install_dir/$binary_name!" >&2
+    if [ ! -f "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME" ]; then
+        echo " !     Heroku AppLink Service Mesh binary not found at $install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME!" >&2
         return 1
     fi
 
-    echo "       Installing $binary_name..."
-    chmod +x "$install_dir/$binary_name"
-
-    # Create symlink for well-known name
-    ln -sf "$binary_name" "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME"
+    echo "       Installing..."
+    chmod +x "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME"
 
     # Cleanup
-    rm -f "$install_dir/public-key.asc" "${install_dir}/${binary_name}.asc"
+    rm -f "$install_dir/public-key.asc" "${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
 
     echo "       Done!"
 }
