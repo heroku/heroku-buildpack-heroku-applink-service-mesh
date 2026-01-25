@@ -5,10 +5,13 @@ set -euo pipefail
 BUILDER_TAG="${1:-24}"
 ARCH="${2:-arm64}"
 
+BUILDER="heroku/builder:${BUILDER_TAG}"
+PLATFORM="linux/${ARCH}"
+
 OUTPUT_IMAGE="applink-cnb-test"
 
 pack build "${OUTPUT_IMAGE}" \
-    --builder "heroku/builder:${BUILDER_TAG}" \
-    --platform "linux/${ARCH}" \
+    --builder "${BUILDER}" \
+    --platform "${PLATFORM}" \
     --buildpack ./ \
     --trust-extra-buildpacks
