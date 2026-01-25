@@ -33,5 +33,8 @@ run_build() {
 
 run_build
 
+echo "Rebuild to test caching"
+run_build
+
 echo "Removing test output image '${OUTPUT_IMAGE}'"
 docker rmi "${OUTPUT_IMAGE}" &> /dev/null || true
