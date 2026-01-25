@@ -32,9 +32,6 @@ get_s3_url() {
 install_applink_binary() {
     local install_dir="$1"
 
-    local arch
-    arch=$(detect_arch)
-    
     local s3_url
     s3_url=$(get_s3_url)
     local binary_name
@@ -54,7 +51,7 @@ install_applink_binary() {
     fi
 
     # Download and verify
-    echo "-----> Installing Heroku AppLink Service Mesh for $arch..."
+    echo "-----> Installing Heroku AppLink Service Mesh"
     echo "       Downloading $binary_name..."
     local current_dir
     current_dir=$(pwd)
