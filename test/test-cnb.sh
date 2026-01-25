@@ -2,8 +2,8 @@
 #
 # CNB buildpack test script
 #
-# Usage: test/test-cnb.sh [BUILDER_TAG] [ARCH] [FIXTURE]
-#   BUILDER_TAG: Heroku builder version (default: 24)
+# Usage: test/test-cnb.sh [HEROKU_BUILDER] [ARCH] [FIXTURE]
+#   HEROKU_BUILDER: Heroku builder (default: builder:24)
 #   ARCH: Architecture to test (default: arm64)
 #   FIXTURE: Test fixture directory (default: test/fixtures/procfile_with_web_using_applink)
 #
@@ -19,11 +19,11 @@
 
 set -euo pipefail
 
-BUILDER_TAG="${1:-24}"
+HEROKU_BUILDER="${1:-builder:24}"
 ARCH="${2:-arm64}"
 FIXTURE="${3:-test/fixtures/procfile_with_web_using_applink}"
 
-BUILDER="heroku/builder:${BUILDER_TAG}"
+BUILDER="heroku/${HEROKU_BUILDER}"
 PLATFORM="linux/${ARCH}"
 
 OUTPUT_IMAGE="applink-cnb-test"
