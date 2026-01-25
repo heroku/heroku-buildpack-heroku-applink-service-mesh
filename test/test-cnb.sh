@@ -11,10 +11,12 @@ PLATFORM="linux/${ARCH}"
 
 OUTPUT_IMAGE="applink-cnb-test"
 
-if [ ! -z "$(docker images -q ${OUTPUT_IMAGE})" ]; then
-    echo "Removing old test output image '${OUTPUT_IMAGE}'"
-    docker rmi "${OUTPUT_IMAGE}" &> /dev/null
-fi
+remove_image() {
+    if [ ! -z "$(docker images -q ${OUTPUT_IMAGE})" ]; then
+        echo "Removing test output image '${OUTPUT_IMAGE}'"
+        docker rmi "${OUTPUT_IMAGE}" &> /dev/null || true
+    fi
+}
 
 run_build() {
     echo "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
@@ -31,10 +33,11 @@ run_build() {
         -- heroku-applink-service-mesh -v
 }
 
+remove_image
+
 run_build
 
 echo "Rebuild to test caching"
 run_build
 
-echo "Removing test output image '${OUTPUT_IMAGE}'"
-docker rmi "${OUTPUT_IMAGE}" &> /dev/null || true
+remove_image
