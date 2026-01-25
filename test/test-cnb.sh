@@ -11,6 +11,7 @@ PLATFORM="linux/${ARCH}"
 
 OUTPUT_IMAGE="applink-cnb-test"
 
+echo "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
 pack build "${OUTPUT_IMAGE}" \
     --builder "${BUILDER}" \
     --platform "${PLATFORM}" \
