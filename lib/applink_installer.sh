@@ -98,6 +98,4 @@ install_applink_binary() {
     rm -f "$install_dir/public-key.asc" "${install_dir}/${binary_name}.asc"
 
     echo "       Done!"
-
-    return 0
 }
