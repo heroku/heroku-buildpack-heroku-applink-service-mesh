@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
+source "${BUILDPACK_DIR:?}/lib/applink_installer.sh"
+
 # CNB buildpack specific variables
 LAYERS_DIR="$1"
 PLATFORM_DIR="$2"
@@ -20,9 +23,6 @@ if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; the
     HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
     export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
 fi
-
-BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
-source "${BUILDPACK_DIR:?}/lib/applink_installer.sh"
 
 # Get current ETag from S3
 S3_URL=$(get_s3_url)
