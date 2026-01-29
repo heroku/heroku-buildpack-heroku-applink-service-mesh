@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
+
 # CNB buildpack specific variables
 LAYERS_DIR="$1"
 PLATFORM_DIR="$2"
@@ -24,8 +26,7 @@ if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; the
     export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
 fi
 
-# shellcheck source=../lib/applink_installer.sh
-source "$(dirname "$0")/../lib/applink_installer.sh"
+source "${BUILDPACK_DIR}/lib/applink_installer.sh"
 
 # Determine current arch for caching
 CURRENT_ARCH=$(detect_arch)
