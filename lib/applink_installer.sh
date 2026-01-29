@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export APPLINK_WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
+
 # Detect and normalize architecture
 detect_arch() {
     local arch

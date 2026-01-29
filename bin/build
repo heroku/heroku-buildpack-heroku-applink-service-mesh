@@ -52,12 +52,12 @@ if [ -f "${LAYER_DIR}.toml" ]; then
     CACHED_BINARY_NAME=$(grep "binary_name = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
 
     # Check if binary exists and metadata matches
-    if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
+    if [ -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ] && \
        [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
        [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
         echo "-----> Reusing cached Heroku AppLink Service Mesh"
         LAYER_NEEDS_REBUILD=false
-        APPLINK_BINARY_NAME="${CACHED_BINARY_NAME:-heroku-applink-service-mesh}"
+        APPLINK_BINARY_NAME="${CACHED_BINARY_NAME:-${APPLINK_WELL_KNOWN_BINARY_NAME}}"
     fi
 fi
 
@@ -91,11 +91,11 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     if [ -z "$WEB_COMMAND" ]; then
         echo " !     No web process found in Procfile"
         echo " !     Please add the following to your Procfile:"
-        echo " !     web: heroku-applink-service-mesh <your app startup command>"
+        echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
     else
         # Check if web command already contains the binary name
-        if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
-            echo " !     Web process already contains the heroku-applink-service-mesh binary name"
+        if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
+            echo " !     Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
         else
         # Create launch.toml to set the start command
         cat > "${LAYERS_DIR}/launch.toml" << EOL
@@ -110,7 +110,7 @@ EOL
 else
     echo " !     Procfile not found at ${APP_DIR}/Procfile"
     echo " !     Please add the following to your Procfile:"
-    echo " !     web: heroku-applink-service-mesh <your app startup command>"
+    echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
 fi
 
 echo "-----> Done!"
