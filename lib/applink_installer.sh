@@ -72,6 +72,15 @@ install_applink_binary() {
         return 1
     fi
 
+    # Create symlink from S3 object name (e.g. `heroku-applink-service-mesh-latest-amd64`)
+    # to the well-known binary name for backwards compatibility with existing Procfiles.
+    # TODO: Remove once users migrate. We should first warn, then eventually fail the build 
+    # if the legacy name is detected to prevent apps from breaking at runtime.
+    legacy_name="$(basename "${s3_url}")"
+    if [ "${legacy_name}" != "${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
+        ln -sf "${APPLINK_WELL_KNOWN_BINARY_NAME}" "${legacy_name}"
+    fi
+
     cd "$current_dir"
 
     # Install binary
