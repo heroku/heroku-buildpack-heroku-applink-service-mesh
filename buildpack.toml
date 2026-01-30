@@ -13,3 +13,6 @@ arch = "amd64"
 [[targets]]
 os = "linux"
 arch = "arm64"
+
+[metadata.release]
+image = { repository = "docker.io/heroku/buildpack-heroku-applink" }
