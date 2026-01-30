@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `bin/build` script and `buildpack.toml` files for CNB compatibility. ([#10](https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/pull/10))
+
 ## [1.0.1] - 2025-07-07
 
 ### Added
