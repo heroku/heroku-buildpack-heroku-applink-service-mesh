@@ -9,11 +9,8 @@ LAYERS_DIR="$1"
 PLATFORM_DIR="$2"
 APP_DIR="/workspace"
 
-echo "-----> Installing Heroku AppLink Service Mesh..."
-
-# Create layers directory structure
+# Set layer directory path
 LAYER_DIR="${LAYERS_DIR}/service-mesh"
-mkdir -p "$LAYER_DIR"
 
 # Read allowed environment variables from platform directory
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET" ]; then
@@ -28,44 +25,30 @@ fi
 
 source "${BUILDPACK_DIR}/lib/applink_installer.sh"
 
-# Determine current arch for caching
-CURRENT_ARCH=$(detect_arch)
-
-# Get current ETag from S3 to check for changes
-S3_BUCKET="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
-VERSION="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
-BINARY_NAME="heroku-applink-service-mesh-${VERSION}-${CURRENT_ARCH}"
-S3_URL="https://${S3_BUCKET}.s3.amazonaws.com/${BINARY_NAME}"
-
-echo "-----> Checking for cached Heroku AppLink Service Mesh..."
+# Get current ETag from S3
+S3_URL=$(get_s3_url)
 CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag: *//i' | tr -d '"' | tr -d '\r' || echo "")
-if [ -z "$CURRENT_ETAG" ]; then
-    echo "-----> Warning: Could not retrieve ETag from S3, skipping cache validation"
-    LAYER_NEEDS_REBUILD=true
-fi
 
-# Check if we can reuse the existing layer
-LAYER_NEEDS_REBUILD=true
-if [ -f "${LAYER_DIR}.toml" ]; then
-    # Read cached metadata (handle indented TOML)
-    CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-    CACHED_ARCH=$(grep "arch = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-    CACHED_BINARY_NAME=$(grep "binary_name = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+# Check if layer was restored
+if [ -d "${LAYER_DIR}" ]; then
+    # Get ETag from layer metadata
+    CACHED_ETAG=""
+    if [ -f "${LAYER_DIR}.toml" ]; then
+        CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+    fi
 
-    # Check if binary exists and metadata matches
-    if [ -f "${LAYER_DIR}/bin/heroku-applink-service-mesh" ] && \
-       [ "$CACHED_ETAG" = "$CURRENT_ETAG" ] && \
-       [ "$CACHED_ARCH" = "$CURRENT_ARCH" ]; then
-        echo "-----> Reusing cached Heroku AppLink Service Mesh"
-        LAYER_NEEDS_REBUILD=false
-        APPLINK_BINARY_NAME="${CACHED_BINARY_NAME:-heroku-applink-service-mesh}"
+    # Check if cached binary can be reused
+    if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
+        echo "-----> Reusing cached Heroku AppLink Service Mesh binary"
+    else
+        echo "-----> Deleting cached Heroku AppLink Service Mesh binary"
+        rm -rf "${LAYER_DIR}"
     fi
 fi
 
-if [ "$LAYER_NEEDS_REBUILD" = "true" ]; then
-    # Install binary to layer bin directory (automatically added to PATH)
-    mkdir -p "${LAYER_DIR}/bin"
-    if ! install_applink_binary "${LAYER_DIR}/bin" "$CURRENT_ARCH" "$VERSION" "$S3_BUCKET"; then
+# Install binary if it doesn't exist (i.e. on first run, or after the cache has been purged)
+if [ ! -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
+    if ! install_applink_binary "${LAYER_DIR}/bin"; then
         echo " !     Failed to install Heroku AppLink Service Mesh binary"
         exit 1
     fi
@@ -80,8 +63,6 @@ cache = true
 
 [metadata]
 etag = "${CURRENT_ETAG}"
-arch = "${CURRENT_ARCH}"
-binary_name = "${APPLINK_BINARY_NAME}"
 EOL
 
 
@@ -92,26 +73,26 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     if [ -z "$WEB_COMMAND" ]; then
         echo " !     No web process found in Procfile"
         echo " !     Please add the following to your Procfile:"
-        echo " !     web: heroku-applink-service-mesh <your app startup command>"
+        echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
     else
         # Check if web command already contains the binary name
-        if [[ "$WEB_COMMAND" == *"$APPLINK_BINARY_NAME"* ]]; then
-            echo " !     Web process already contains the heroku-applink-service-mesh binary name"
+        if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
+            echo " !     Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
         else
         # Create launch.toml to set the start command
         cat > "${LAYERS_DIR}/launch.toml" << EOL
 [[processes]]
 type = "web"
-command = ["${APPLINK_BINARY_NAME}", "${WEB_COMMAND}"]
+command = ["${APPLINK_WELL_KNOWN_BINARY_NAME}", "${WEB_COMMAND}"]
 EOL
-            echo "-----> Command to be executed: ${APPLINK_BINARY_NAME} ${WEB_COMMAND}"
+            echo "-----> Command to be executed: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
             echo "-----> The service mesh will automatically wrap your web process at runtime"
         fi
     fi
 else
     echo " !     Procfile not found at ${APP_DIR}/Procfile"
     echo " !     Please add the following to your Procfile:"
-    echo " !     web: heroku-applink-service-mesh <your app startup command>"
+    echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
 fi
 
 echo "-----> Done!"
