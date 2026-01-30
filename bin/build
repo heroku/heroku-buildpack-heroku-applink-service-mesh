@@ -77,16 +77,11 @@ if [ -f "${APP_DIR}/Procfile" ]; then
     else
         # Check if web command already contains the binary name
         if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
-            echo " !     Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
+            echo "       Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
         else
-        # Create launch.toml to set the start command
-        cat > "${LAYERS_DIR}/launch.toml" << EOL
-[[processes]]
-type = "web"
-command = ["${APPLINK_WELL_KNOWN_BINARY_NAME}", "${WEB_COMMAND}"]
-EOL
-            echo "-----> Command to be executed: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
-            echo "-----> The service mesh will automatically wrap your web process at runtime"
+            echo " !     Web process doesn't contain the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
+            echo " !     Please configure '${APPLINK_WELL_KNOWN_BINARY_NAME}' to start your web app, e.g.:"
+            echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
         fi
     fi
 else
