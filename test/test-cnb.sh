@@ -54,6 +54,11 @@ run_build() {
     docker run \
         --rm "$OUTPUT_IMAGE" \
         -- heroku-applink-service-mesh -v
+
+    output::info "Running 'heroku-applink-service-mesh-latest-${ARCH} -v' on output image '${OUTPUT_IMAGE}'"
+    docker run \
+        --rm "$OUTPUT_IMAGE" \
+        -- "heroku-applink-service-mesh-latest-${ARCH}" -v
 }
 
 remove_image
