@@ -2,7 +2,7 @@ api = "0.10"
 
 [buildpack]
 id = "heroku/heroku-applink"
-version = "1.0"
+version = "1.0.1"
 clear-env = true
 
 # Targets the buildpack will work with
@@ -13,3 +13,6 @@ arch = "amd64"
 [[targets]]
 os = "linux"
 arch = "arm64"
+
+[metadata.release]
+image = { repository = "docker.io/heroku/buildpack-heroku-applink" }
