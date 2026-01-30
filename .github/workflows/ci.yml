@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: shellcheck
-        run: shellcheck bin/*
+        run: shellcheck bin/* lib/*
 
   test-stack:
     needs: lint
@@ -27,3 +27,19 @@ jobs:
       env:
         REPO_OWNER: heroku
         REPO_PROJECT: heroku-integration-service-mesh
+
+  test-cnb:
+    strategy:
+      matrix:
+        builder: ["builder:24", "builder:22"]
+        arch: ["amd64", "arm64"]
+        exclude:
+          - builder: "builder:22"
+            arch: "arm64"
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install Pack CLI
+      uses: buildpacks/github-actions/setup-pack@f3ec16c6d708761c6e87bbc8fe7f97375f80e7cd # v5.10.1
+    - name: Run CNB test
+      run: bash test/test-cnb.sh ${{ matrix.builder }} ${{ matrix.arch }}
