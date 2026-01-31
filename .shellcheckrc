@@ -1,6 +1,2 @@
 # Enable all optional checks
 enable=all
-
-# Disable info-level checks that don't represent actual issues
-disable=SC2310  # Function invoked in ! or if condition disables set -e
-disable=SC2312  # Consider invoking command separately to avoid masking return value

@@ -35,6 +35,7 @@ output::info() {
 }
 
 remove_image() {
+	# shellcheck disable=SC2312
 	if [[ -n "$(docker images -q "${OUTPUT_IMAGE}")" ]]; then
 		output::info "Removing test output image '${OUTPUT_IMAGE}'"
 		docker rmi "${OUTPUT_IMAGE}" &>/dev/null || true

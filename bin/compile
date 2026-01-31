@@ -36,6 +36,7 @@ export_env_dir "${ENV_DIR}"
 VENDOR_DIR="vendor/heroku-applink/bin"
 DOWNLOAD_INSTALL_DIR="${BUILD_DIR}/${VENDOR_DIR}"
 
+# shellcheck disable=SC2310
 if ! install_applink_binary "${DOWNLOAD_INSTALL_DIR}"; then
 	echo " !     Failed to install Heroku AppLink Service Mesh binary"
 	exit 1

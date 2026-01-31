@@ -48,6 +48,7 @@ fi
 
 # Install binary if it doesn't exist (i.e. on first run, or after the cache has been purged)
 if [[ ! -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]]; then
+	# shellcheck disable=SC2310
 	if ! install_applink_binary "${LAYER_DIR}/bin"; then
 		echo " !     Failed to install Heroku AppLink Service Mesh binary"
 		exit 1
