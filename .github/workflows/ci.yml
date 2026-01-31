@@ -13,6 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run ShellCheck
         run: make lint-scripts
+      - name: Install shfmt
+        run: sudo snap install shfmt
       - name: Check shell formatting
         run: make check-format
 
