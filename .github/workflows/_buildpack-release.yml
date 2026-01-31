@@ -139,8 +139,8 @@ jobs:
               output_dir=$(jq --exit-status -r '.output_dir' <<< "${target}")
               if [[ "$buildpack_type" == "bash" ]]; then
                 echo "Copying bash buildpack from ${buildpack_dir} to ${output_dir}."
-                mkdir -p $(dirname "$output_dir")
-                cp -R "$buildpack_dir" "$output_dir"
+                mkdir -p "$output_dir"
+                rsync -a "${buildpack_dir}/" "${output_dir}/" --exclude packaged
                 continue
               fi
               echo "Packaging ${buildpack_dir}."
