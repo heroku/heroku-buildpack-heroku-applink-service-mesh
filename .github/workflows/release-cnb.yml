@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   release:
     name: Release
-    uses: ./.github/workflows/_buildpacks-release.yml
+    uses: ./.github/workflows/_buildpack-release.yml
     with:
       app_id: ${{ vars.LINGUIST_GH_APP_ID }}
       dry_run: ${{ inputs.dry_run }}
