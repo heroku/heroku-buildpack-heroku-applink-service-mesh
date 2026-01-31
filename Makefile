@@ -10,12 +10,12 @@ lint: lint-scripts
 
 lint-scripts:
 	@echo "Running shellcheck..."
-	shellcheck bin/* lib/* test/*.sh
+	@git ls-files -z --cached --others --exclude-standard 'bin/*' 'lib/*' 'test/*.sh' | xargs -0 shellcheck --check-sourced --color=always
 
 format:
 	@echo "Formatting shell scripts with shfmt..."
-	shfmt --write --indent 0 --case-indent --binary-next-line bin/ lib/ test/
+	@shfmt --write .
 
 check-format:
 	@echo "Checking shell script formatting..."
-	shfmt --diff --indent 0 --case-indent --binary-next-line bin/ lib/ test/
+	@shfmt --diff .
