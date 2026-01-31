@@ -35,7 +35,7 @@ output::info() {
 }
 
 remove_image() {
-	if [ ! -z "$(docker images -q ${OUTPUT_IMAGE})" ]; then
+	if [[ -n "$(docker images -q "${OUTPUT_IMAGE}")" ]]; then
 		output::info "Removing test output image '${OUTPUT_IMAGE}'"
 		docker rmi "${OUTPUT_IMAGE}" &>/dev/null || true
 	fi
@@ -52,12 +52,12 @@ run_build() {
 
 	output::info "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
 	docker run \
-		--rm "$OUTPUT_IMAGE" \
+		--rm "${OUTPUT_IMAGE}" \
 		-- heroku-applink-service-mesh -v
 
 	output::info "Running 'heroku-applink-service-mesh-latest-${ARCH} -v' on output image '${OUTPUT_IMAGE}'"
 	docker run \
-		--rm "$OUTPUT_IMAGE" \
+		--rm "${OUTPUT_IMAGE}" \
 		-- "heroku-applink-service-mesh-latest-${ARCH}" -v
 }
 

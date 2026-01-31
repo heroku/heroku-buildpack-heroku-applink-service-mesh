@@ -8,12 +8,12 @@ export APPLINK_WELL_KNOWN_BINARY_NAME="heroku-applink-service-mesh"
 detect_arch() {
 	local arch
 	arch=$(uname -m)
-	if [ "$arch" = "x86_64" ]; then
+	if [[ "${arch}" = "x86_64" ]]; then
 		echo "amd64"
-	elif [ "$arch" = "aarch64" ]; then
+	elif [[ "${arch}" = "aarch64" ]]; then
 		echo "arm64"
 	else
-		echo " !     Unsupported architecture: $arch" >&2
+		echo " !     Unsupported architecture: ${arch}" >&2
 		return 1
 	fi
 }
@@ -39,7 +39,7 @@ install_applink_binary() {
 	local pubkey_url="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
 
 	# Create installation directory
-	mkdir -p "$install_dir"
+	mkdir -p "${install_dir}"
 
 	# Require gpg
 	if ! command -v gpg >/dev/null; then
@@ -53,12 +53,12 @@ install_applink_binary() {
 	echo "       Downloading ${APPLINK_WELL_KNOWN_BINARY_NAME}"
 	local current_dir
 	current_dir=$(pwd)
-	cd "$install_dir"
+	cd "${install_dir}"
 
 	# Download binary, signature and public key
-	curl -JLs "$s3_url" -o "$APPLINK_WELL_KNOWN_BINARY_NAME"
-	curl -JLs "$asc_url" -o "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
-	curl -JLs "$pubkey_url" -o "public-key.asc"
+	curl -JLs "${s3_url}" -o "${APPLINK_WELL_KNOWN_BINARY_NAME}"
+	curl -JLs "${asc_url}" -o "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
+	curl -JLs "${pubkey_url}" -o "public-key.asc"
 
 	# Import public key
 	echo "       Importing public key..."
@@ -66,9 +66,9 @@ install_applink_binary() {
 
 	# Verify signature
 	echo "       Verifying binary signature..."
-	if ! gpg --verify "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc" "$APPLINK_WELL_KNOWN_BINARY_NAME"; then
+	if ! gpg --verify "${APPLINK_WELL_KNOWN_BINARY_NAME}.asc" "${APPLINK_WELL_KNOWN_BINARY_NAME}"; then
 		echo " !     Binary signature verification failed!" >&2
-		cd "$current_dir"
+		cd "${current_dir}"
 		return 1
 	fi
 
@@ -77,23 +77,23 @@ install_applink_binary() {
 	# TODO: Remove once users migrate. We should first warn, then eventually fail the build
 	# if the legacy name is detected to prevent apps from breaking at runtime.
 	legacy_name="$(basename "${s3_url}")"
-	if [ "${legacy_name}" != "${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
+	if [[ "${legacy_name}" != "${APPLINK_WELL_KNOWN_BINARY_NAME}" ]]; then
 		ln -sf "${APPLINK_WELL_KNOWN_BINARY_NAME}" "${legacy_name}"
 	fi
 
-	cd "$current_dir"
+	cd "${current_dir}"
 
 	# Install binary
-	if [ ! -f "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME" ]; then
-		echo " !     Heroku AppLink Service Mesh binary not found at $install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME!" >&2
+	if [[ ! -f "${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]]; then
+		echo " !     Heroku AppLink Service Mesh binary not found at ${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}!" >&2
 		return 1
 	fi
 
 	echo "       Installing ${APPLINK_WELL_KNOWN_BINARY_NAME}..."
-	chmod +x "$install_dir/$APPLINK_WELL_KNOWN_BINARY_NAME"
+	chmod +x "${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}"
 
 	# Cleanup
-	rm -f "$install_dir/public-key.asc" "${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
+	rm -f "${install_dir}/public-key.asc" "${install_dir}/${APPLINK_WELL_KNOWN_BINARY_NAME}.asc"
 
 	echo "       Done!"
 }
