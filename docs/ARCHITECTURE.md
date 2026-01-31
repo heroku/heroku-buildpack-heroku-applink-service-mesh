@@ -27,7 +27,7 @@ The buildpack supports both traditional Heroku buildpacks (V2) and Cloud Native 
 2. **Compilation Phase** (`compile`): Downloads and installs the service mesh binary
 
 #### Cloud Native Buildpack Flow
-1. **Build Phase** (`build`): 
+1. **Build Phase** (`build`):
    - Creates CNB layer structure
    - Delegates to `compile` script
    - Configures process launch commands
