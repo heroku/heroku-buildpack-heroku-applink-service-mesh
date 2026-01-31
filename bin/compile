@@ -7,20 +7,20 @@ BUILDPACK_DIR=$(cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")" && pwd)
 source "${BUILDPACK_DIR}/lib/applink_installer.sh"
 
 export_env_dir() {
-  local env_dir=$1
-  if [ -d "$env_dir" ]; then
-    local acceptlist_regex=${2:-''}
-    local denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+	local env_dir=$1
+	if [ -d "$env_dir" ]; then
+		local acceptlist_regex=${2:-''}
+		local denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
 
-    pushd "$env_dir" > /dev/null
-    for e in *; do
-      [ -e "$e" ] || continue
-      echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
-        export "$e=$(cat "$e")"
-        :
-    done
-    popd > /dev/null
-  fi
+		pushd "$env_dir" >/dev/null
+		for e in *; do
+			[ -e "$e" ] || continue
+			echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" \
+				&& export "$e=$(cat "$e")"
+			:
+		done
+		popd >/dev/null
+	fi
 }
 
 # Gather params
@@ -37,14 +37,14 @@ VENDOR_DIR="vendor/heroku-applink/bin"
 DOWNLOAD_INSTALL_DIR="$BUILD_DIR/$VENDOR_DIR"
 
 if ! install_applink_binary "$DOWNLOAD_INSTALL_DIR"; then
-    echo " !     Failed to install Heroku AppLink Service Mesh binary"
-    exit 1
+	echo " !     Failed to install Heroku AppLink Service Mesh binary"
+	exit 1
 fi
 
 # Setup .profile.d for PATH
 PROFILE_PATH="$BUILD_DIR/.profile.d/heroku-applink-service-mesh.sh"
 mkdir -p "$(dirname "$PROFILE_PATH")"
-echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >> "$PROFILE_PATH"
+echo "export PATH=\"\$PATH:\$HOME/$VENDOR_DIR\"" >>"$PROFILE_PATH"
 
 echo "-----> Ensure that ${APPLINK_WELL_KNOWN_BINARY_NAME} is configured in your Procfile's web process to start your app:"
 echo "       web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <app startup command>"

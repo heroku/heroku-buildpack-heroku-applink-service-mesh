@@ -14,13 +14,13 @@ LAYER_DIR="${LAYERS_DIR}/service-mesh"
 
 # Read allowed environment variables from platform directory
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET" ]; then
-    HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET")
-    export HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET
+	HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET")
+	export HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET
 fi
 
 if [ -f "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION" ]; then
-    HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
-    export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
+	HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION=$(cat "${PLATFORM_DIR}/env/HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION")
+	export HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION
 fi
 
 source "${BUILDPACK_DIR}/lib/applink_installer.sh"
@@ -31,31 +31,31 @@ CURRENT_ETAG=$(curl -sI "$S3_URL" 2>/dev/null | grep -i '^etag:' | sed 's/^etag:
 
 # Check if layer was restored
 if [ -d "${LAYER_DIR}" ]; then
-    # Get ETag from layer metadata
-    CACHED_ETAG=""
-    if [ -f "${LAYER_DIR}.toml" ]; then
-        CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
-    fi
+	# Get ETag from layer metadata
+	CACHED_ETAG=""
+	if [ -f "${LAYER_DIR}.toml" ]; then
+		CACHED_ETAG=$(grep "etag = " "${LAYER_DIR}.toml" | cut -d'"' -f2 2>/dev/null || echo "")
+	fi
 
-    # Check if cached binary can be reused
-    if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
-        echo "-----> Reusing cached Heroku AppLink Service Mesh binary"
-    else
-        echo "-----> Deleting cached Heroku AppLink Service Mesh binary"
-        rm -rf "${LAYER_DIR}"
-    fi
+	# Check if cached binary can be reused
+	if [ -n "$CACHED_ETAG" ] && [ -n "$CURRENT_ETAG" ] && [ "$CACHED_ETAG" = "$CURRENT_ETAG" ]; then
+		echo "-----> Reusing cached Heroku AppLink Service Mesh binary"
+	else
+		echo "-----> Deleting cached Heroku AppLink Service Mesh binary"
+		rm -rf "${LAYER_DIR}"
+	fi
 fi
 
 # Install binary if it doesn't exist (i.e. on first run, or after the cache has been purged)
 if [ ! -f "${LAYER_DIR}/bin/${APPLINK_WELL_KNOWN_BINARY_NAME}" ]; then
-    if ! install_applink_binary "${LAYER_DIR}/bin"; then
-        echo " !     Failed to install Heroku AppLink Service Mesh binary"
-        exit 1
-    fi
+	if ! install_applink_binary "${LAYER_DIR}/bin"; then
+		echo " !     Failed to install Heroku AppLink Service Mesh binary"
+		exit 1
+	fi
 fi
 
 # Create/update layer metadata
-cat > "${LAYER_DIR}.toml" << EOL
+cat >"${LAYER_DIR}.toml" <<EOL
 [types]
 launch = true
 build = false
@@ -65,30 +65,28 @@ cache = true
 etag = "${CURRENT_ETAG}"
 EOL
 
-
 # Read web process from Procfile
 echo "-----> Reading web process from Procfile..."
 if [ -f "${APP_DIR}/Procfile" ]; then
-    WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //' || echo "")
-    if [ -z "$WEB_COMMAND" ]; then
-        echo " !     No web process found in Procfile"
-        echo " !     Please add the following to your Procfile:"
-        echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
-    else
-        # Check if web command already contains the binary name
-        if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
-            echo "       Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
-        else
-            echo " !     Web process doesn't contain the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
-            echo " !     Please configure '${APPLINK_WELL_KNOWN_BINARY_NAME}' to start your web app, e.g.:"
-            echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
-        fi
-    fi
+	WEB_COMMAND=$(grep "^web:" "${APP_DIR}/Procfile" | sed 's/^web: //' || echo "")
+	if [ -z "$WEB_COMMAND" ]; then
+		echo " !     No web process found in Procfile"
+		echo " !     Please add the following to your Procfile:"
+		echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
+	else
+		# Check if web command already contains the binary name
+		if [[ "$WEB_COMMAND" == *"${APPLINK_WELL_KNOWN_BINARY_NAME}"* ]]; then
+			echo "       Web process already contains the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
+		else
+			echo " !     Web process doesn't contain the ${APPLINK_WELL_KNOWN_BINARY_NAME} binary name"
+			echo " !     Please configure '${APPLINK_WELL_KNOWN_BINARY_NAME}' to start your web app, e.g.:"
+			echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} ${WEB_COMMAND}"
+		fi
+	fi
 else
-    echo " !     Procfile not found at ${APP_DIR}/Procfile"
-    echo " !     Please add the following to your Procfile:"
-    echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
+	echo " !     Procfile not found at ${APP_DIR}/Procfile"
+	echo " !     Please add the following to your Procfile:"
+	echo " !     web: ${APPLINK_WELL_KNOWN_BINARY_NAME} <your app startup command>"
 fi
 
 echo "-----> Done!"
-
