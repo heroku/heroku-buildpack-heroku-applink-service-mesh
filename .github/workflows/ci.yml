@@ -11,8 +11,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: shellcheck
-        run: shellcheck bin/* lib/*
+      - name: Run ShellCheck
+        run: make lint-scripts
+      - name: Install shfmt
+        run: sudo snap install shfmt
+      - name: Check shell formatting
+        run: make check-format
 
   test-stack:
     needs: lint

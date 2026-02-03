@@ -29,36 +29,37 @@ PLATFORM="linux/${ARCH}"
 OUTPUT_IMAGE="applink-cnb-test"
 
 output::info() {
-    local ansi_blue=$'\e[1;34m'
-    local ansi_reset=$'\e[0m'
-    echo -e "${ansi_blue}$*${ansi_reset}"
+	local ansi_blue=$'\e[1;34m'
+	local ansi_reset=$'\e[0m'
+	echo -e "${ansi_blue}$*${ansi_reset}"
 }
 
 remove_image() {
-    if [ ! -z "$(docker images -q ${OUTPUT_IMAGE})" ]; then
-        output::info "Removing test output image '${OUTPUT_IMAGE}'"
-        docker rmi "${OUTPUT_IMAGE}" &> /dev/null || true
-    fi
+	# shellcheck disable=SC2312 # Intentional: docker command in test condition to check image existence
+	if [[ -n "$(docker images -q "${OUTPUT_IMAGE}")" ]]; then
+		output::info "Removing test output image '${OUTPUT_IMAGE}'"
+		docker rmi "${OUTPUT_IMAGE}" &>/dev/null || true
+	fi
 }
 
 run_build() {
-    output::info "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
-    pack build "${OUTPUT_IMAGE}" \
-        --builder "${BUILDER}" \
-        --platform "${PLATFORM}" \
-        --buildpack ./ \
-        --trust-extra-buildpacks \
-        --path "${FIXTURE}"
+	output::info "Running pack to build '${FIXTURE}' with CNB using '${BUILDER}' on '${PLATFORM}'"
+	pack build "${OUTPUT_IMAGE}" \
+		--builder "${BUILDER}" \
+		--platform "${PLATFORM}" \
+		--buildpack ./ \
+		--trust-extra-buildpacks \
+		--path "${FIXTURE}"
 
-    output::info "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
-    docker run \
-        --rm "$OUTPUT_IMAGE" \
-        -- heroku-applink-service-mesh -v
+	output::info "Running 'heroku-applink-service-mesh -v' on output image '${OUTPUT_IMAGE}'"
+	docker run \
+		--rm "${OUTPUT_IMAGE}" \
+		-- heroku-applink-service-mesh -v
 
-    output::info "Running 'heroku-applink-service-mesh-latest-${ARCH} -v' on output image '${OUTPUT_IMAGE}'"
-    docker run \
-        --rm "$OUTPUT_IMAGE" \
-        -- "heroku-applink-service-mesh-latest-${ARCH}" -v
+	output::info "Running 'heroku-applink-service-mesh-latest-${ARCH} -v' on output image '${OUTPUT_IMAGE}'"
+	docker run \
+		--rm "${OUTPUT_IMAGE}" \
+		-- "heroku-applink-service-mesh-latest-${ARCH}" -v
 }
 
 remove_image
