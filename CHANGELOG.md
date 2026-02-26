@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-26
+
 ### Changed
 
 - Changed the S3 URLs used for downloads to use AWS' dual-stack (IPv6 compatible) endpoint. ([#28](https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/pull/28))
@@ -33,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[unreleased]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.2...HEAD
+[unreleased]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/releases/tag/v1.0.0
