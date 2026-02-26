@@ -25,7 +25,7 @@ get_s3_url() {
 	local version="${HEROKU_APPLINK_SERVICE_MESH_RELEASE_VERSION:-latest}"
 	local s3_bucket="${HEROKU_APPLINK_SERVICE_MESH_S3_BUCKET:-heroku-applink-service-mesh-binaries}"
 	local binary_name="${APPLINK_WELL_KNOWN_BINARY_NAME}-${version}-${arch}"
-	echo "https://${s3_bucket}.s3.amazonaws.com/${binary_name}"
+	echo "https://${s3_bucket}.s3.dualstack.us-east-1.amazonaws.com/${binary_name}"
 }
 
 # Utility for downloading, verifying, and installing Heroku AppLink Service Mesh binary
@@ -36,7 +36,7 @@ install_applink_binary() {
 	s3_url=$(get_s3_url)
 
 	local asc_url="${s3_url}.asc"
-	local pubkey_url="https://heroku-applink-service-mesh-binaries.s3.amazonaws.com/public-key.asc"
+	local pubkey_url="https://heroku-applink-service-mesh-binaries.s3.dualstack.us-east-1.amazonaws.com/public-key.asc"
 
 	# Create installation directory
 	mkdir -p "${install_dir}"
