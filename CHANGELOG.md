@@ -9,9 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1] - 2026-03-31
 
-- No changes.
+### Fixed
 
-## [1.1.0] - 2026-02-26
+- Fixed buildpack.toml compatibility with the classic buildpack-registry TOML parser by converting inline table syntax to expanded table syntax. ([#30](https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/pull/30))
+
+### Note
+
+- v1.1.0 git tag exists but was never successfully published to the **classic buildpack registry** due to TOML parsing incompatibility (the buildpack-registry uses TOML gem 0.3.0 which only supports TOML spec 0.4.0, not the TOML 1.0.0 inline table syntax). The CNB release process was not affected. This release supersedes v1.1.0 for classic buildpack users.
+
+## [1.1.0] - 2026-02-26 (Classic Registry: Not Published)
 
 ### Changed
 
