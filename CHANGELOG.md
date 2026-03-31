@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-02-26
+## [1.1.1] - 2026-03-31
+
+### Fixed
+
+- Fixed buildpack.toml compatibility with the classic buildpack-registry TOML parser by converting inline table syntax to expanded table syntax. ([#30](https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/pull/30))
+
+### Note
+
+- v1.1.0 git tag exists but was never successfully published to the **classic buildpack registry** due to TOML parsing incompatibility (the buildpack-registry uses TOML gem 0.3.0 which only supports TOML spec 0.4.0, not the TOML 1.0.0 inline table syntax). The CNB release process was not affected. This release supersedes v1.1.0 for classic buildpack users.
+
+## [1.1.0] - 2026-02-26 (Classic Registry: Not Published)
 
 ### Changed
 
@@ -35,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release.
 
-[unreleased]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/heroku/heroku-buildpack-heroku-applink-service-mesh/compare/v1.0.0...v1.0.1
