@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run ShellCheck
         run: make lint-scripts
       - name: Install shfmt
@@ -25,7 +25,7 @@ jobs:
         stack: [heroku-22, heroku-24]
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: run stack test
       run: bash test/test-stack.sh ${{ matrix.stack }}
       env:
