@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run ShellCheck
         run: make lint-scripts
       - name: Install shfmt
@@ -25,7 +25,7 @@ jobs:
         stack: [heroku-22, heroku-24]
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: run stack test
       run: bash test/test-stack.sh ${{ matrix.stack }}
       env:
@@ -42,7 +42,7 @@ jobs:
             arch: "arm64"
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install Pack CLI
       uses: buildpacks/github-actions/setup-pack@8fe5c9d7f5a3fa22d4b7cc7d50ba8ebd7eddf414 # v5.12.4
     - name: Run CNB test
