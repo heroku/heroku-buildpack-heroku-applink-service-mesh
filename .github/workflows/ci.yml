@@ -44,6 +44,6 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Install Pack CLI
-      uses: buildpacks/github-actions/setup-pack@91cb4574e7b781941b4e3fa950e541e4b8754b3a # v6.2.2
+      uses: buildpacks/github-actions/setup-pack@0f33674a6e9aaddbdce74e58983bc1812871453e # v6.2.4
     - name: Run CNB test
       run: bash test/test-cnb.sh ${{ matrix.builder }} ${{ matrix.arch }}
